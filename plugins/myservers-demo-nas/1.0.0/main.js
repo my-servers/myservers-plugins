@@ -16,6 +16,15 @@ function demoPoints() {
   ];
 }
 
+globalThis.demoBackgroundCount = 0;
+
+globalThis.background = function(ctx) {
+  if (ctx.taskId === "refresh-demo") {
+    globalThis.demoBackgroundCount = globalThis.demoBackgroundCount + 1;
+  }
+  return {};
+};
+
 globalThis.dashboard = function(ctx) {
   const label = demoLabel(ctx);
   return {
@@ -63,6 +72,31 @@ globalThis.dashboard = function(ctx) {
         subtitle: "测试 navigate_route",
         icon: "arrow.right.circle",
         onTap: { actionId: "openDetail", route: "detail" }
+      }
+    ]
+  };
+};
+
+globalThis.widget = function(ctx) {
+  const label = demoLabel(ctx);
+  return {
+    title: label + " 小组件",
+    components: [
+      {
+        id: "load",
+        type: "progressCard",
+        title: "模拟负载",
+        value: 0.58,
+        unit: "%",
+        accent: demoAccent(ctx)
+      },
+      {
+        id: "background",
+        type: "infoCard",
+        title: "后台刷新次数",
+        value: String(globalThis.demoBackgroundCount),
+        subtitle: "由 background(ctx) 更新",
+        accent: "green"
       }
     ]
   };

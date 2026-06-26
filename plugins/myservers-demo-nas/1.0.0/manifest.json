@@ -51,6 +51,20 @@
     }
   ],
   "checksums": {
-    "main.js": "sha256:b6d44fb5680909759b823e1ca5ae3e8cc7fbb4fd389d43bdcd629f35dd66eb8d"
-  }
+    "main.js": "sha256:2eb5ccf058f3e31a89b571ad44f7c5e4c5bd9ce52cea7cdf2fb45ec98acaea34"
+  },
+  "widgets": [
+    {
+      "id": "summary",
+      "name": "NAS 示例小组件",
+      "description": "展示插件返回的通用组件数据。"
+    }
+  ],
+  "background_tasks": [
+    {
+      "id": "refresh-demo",
+      "name": "刷新示例数据",
+      "interval_ms": 60000
+    }
+  ]
 }
