@@ -69,7 +69,7 @@ globalThis.dashboard = function(ctx) {
         id: "open-detail",
         type: "actionButton",
         title: "打开详情",
-        subtitle: "测试 navigate_route",
+        subtitle: "测试 toast + navigate effects",
         icon: "arrow.right.circle",
         onTap: { actionId: "openDetail", route: "detail" }
       }
@@ -147,21 +147,28 @@ globalThis.detail = function(ctx) {
 globalThis.action = function(ctx) {
   if (ctx.actionId === "openDetail") {
     return {
-      toast: "正在打开插件详情",
-      navigate_route: "detail"
+      effects: [
+        { type: "toast", text: "正在打开插件详情", level: "info" },
+        { type: "navigate", surface: "detail", route: "detail" }
+      ]
     };
   }
   return {
-    toast: "插件动作已在 NAS 上执行：" + demoLabel(ctx),
-    refresh: true,
-    components: [
+    effects: [
+      { type: "toast", text: "插件动作已在 NAS 上执行：" + demoLabel(ctx), level: "success" },
+      { type: "refresh", surface: "current" },
       {
-        id: "last-action",
-        type: "infoCard",
-        title: "最近动作",
-        value: "refresh",
-        subtitle: "由 Goja action(ctx) 返回",
-        accent: demoAccent(ctx)
+        type: "replaceComponents",
+        components: [
+          {
+            id: "last-action",
+            type: "infoCard",
+            title: "最近动作",
+            value: "refresh",
+            subtitle: "由 Goja action(ctx) 返回",
+            accent: demoAccent(ctx)
+          }
+        ]
       }
     ]
   };
