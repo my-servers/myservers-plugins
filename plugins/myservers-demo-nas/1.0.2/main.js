@@ -40,19 +40,18 @@ globalThis.dashboard = function(ctx) {
               progressCard: {
                 title: "模拟负载",
                 subtitle: "Goja 生成的 dashboard 组件",
-                value: 0.58,
-                unit: "%",
-                accent: demoAccent(ctx),
-                onTap: { actionId: "refresh" }
+                value: { number: 0.58, unit: "%", format: "percent", status: "PLUGIN_STATUS_HEALTHY" },
+                progress: 0.58,
+                appearance: { accent: demoAccent(ctx), icon: "speedometer", variant: "tinted" },
+                onTap: { plugin: { actionId: "refresh" } }
               }
             },
             {
               id: "status",
               statusBadge: {
                 title: "插件状态",
-                value: "运行中",
-                status: "healthy",
-                accent: "green"
+                value: { text: "运行中", status: "PLUGIN_STATUS_RUNNING" },
+                appearance: { accent: "green", icon: "play.circle.fill", variant: "tinted" }
               }
             }
           ]
@@ -62,10 +61,11 @@ globalThis.dashboard = function(ctx) {
         id: "metrics",
         metricGrid: {
           title: "指标",
+          appearance: { accent: demoAccent(ctx), variant: "tinted" },
           metrics: [
-            { title: "配置名称", value: label, unit: "", accent: demoAccent(ctx) },
-            { title: "组件数", value: "8", unit: "个", accent: "purple" },
-            { title: "执行端", value: "NAS", unit: "", accent: "green" }
+            { title: "配置名称", value: { text: label }, appearance: { accent: demoAccent(ctx) } },
+            { title: "组件数", value: { number: 8, unit: "个", format: "number" }, appearance: { accent: "purple" } },
+            { title: "执行端", value: { text: "NAS" }, appearance: { accent: "green" } }
           ]
         }
       },
@@ -74,8 +74,8 @@ globalThis.dashboard = function(ctx) {
         actionButton: {
           title: "打开详情",
           subtitle: "测试 toast + navigate effects",
-          icon: "arrow.right.circle",
-          onTap: { actionId: "openDetail", route: "detail" }
+          appearance: { accent: "blue", icon: "arrow.right.circle", variant: "filled" },
+          onTap: { plugin: { actionId: "openDetail" } }
         }
       }
     ]
@@ -91,18 +91,18 @@ globalThis.widget = function(ctx) {
         id: "load",
         progressCard: {
           title: "模拟负载",
-          value: 0.58,
-          unit: "%",
-          accent: demoAccent(ctx)
+          value: { number: 0.58, unit: "%", format: "percent", status: "PLUGIN_STATUS_HEALTHY" },
+          progress: 0.58,
+          appearance: { accent: demoAccent(ctx), icon: "speedometer", variant: "tinted" }
         }
       },
       {
         id: "background",
         infoCard: {
           title: "后台刷新次数",
-          value: String(globalThis.demoBackgroundCount),
+          value: { text: String(globalThis.demoBackgroundCount) },
           subtitle: "由 background(ctx) 更新",
-          accent: "green"
+          appearance: { accent: "green", icon: "clock.arrow.circlepath", variant: "tinted" }
         }
       }
     ]
@@ -119,8 +119,8 @@ globalThis.detail = function(ctx) {
         infoCard: {
           title: "当前配置",
           subtitle: "这个值来自安装时的配置表单",
-          value: label,
-          accent: demoAccent(ctx)
+          value: { text: label },
+          appearance: { accent: demoAccent(ctx), icon: "gearshape", variant: "tinted" }
         }
       },
       {
@@ -128,7 +128,8 @@ globalThis.detail = function(ctx) {
         lineChart: {
           title: "模拟趋势",
           points: demoPoints(),
-          accent: demoAccent(ctx)
+          appearance: { accent: demoAccent(ctx), icon: "chart.xyaxis.line", variant: "tinted" },
+          options: { min: 0, max: 100, showLabels: true, emptyText: "暂无趋势数据" }
         }
       },
       {
@@ -136,10 +137,11 @@ globalThis.detail = function(ctx) {
         listCard: {
           title: "验证项",
           items: [
-            { title: "市场列表", subtitle: "GET /plugins", value: "通过", status: "healthy", icon: "list.bullet" },
-            { title: "NAS 下载", subtitle: "manifest assets + checksum", value: "通过", status: "healthy", icon: "arrow.down.circle" },
-            { title: "Goja Action", subtitle: "点击按钮触发 actions.<id>(ctx)", value: "待点击", status: "warning", icon: "hand.tap" }
-          ]
+            { title: "市场列表", subtitle: "GET /plugins", value: { text: "通过", status: "PLUGIN_STATUS_HEALTHY" }, appearance: { accent: "green", icon: "list.bullet" } },
+            { title: "NAS 下载", subtitle: "manifest assets + checksum", value: { text: "通过", status: "PLUGIN_STATUS_HEALTHY" }, appearance: { accent: "green", icon: "arrow.down.circle" } },
+            { title: "Goja Action", subtitle: "点击按钮触发 actions.<id>(ctx)", value: { text: "待点击", status: "PLUGIN_STATUS_WARNING" }, appearance: { accent: "orange", icon: "hand.tap" } }
+          ],
+          appearance: { accent: demoAccent(ctx), variant: "tinted" }
         }
       },
       {
@@ -147,8 +149,8 @@ globalThis.detail = function(ctx) {
         actionButton: {
           title: "刷新示例数据",
           subtitle: "触发 actions.refresh(ctx) 并刷新页面",
-          icon: "arrow.clockwise",
-          onTap: { actionId: "refresh" }
+          appearance: { accent: demoAccent(ctx), icon: "arrow.clockwise", variant: "filled" },
+          onTap: { plugin: { actionId: "refresh" } }
         }
       }
     ]
@@ -171,14 +173,15 @@ globalThis.actions = {
         { refresh: { surface: "current" } },
         {
           replaceComponents: {
+            targetId: "metrics",
             components: [
               {
                 id: "last-action",
                 infoCard: {
                   title: "最近动作",
-                  value: "refresh",
+                  value: { text: "refresh", status: "PLUGIN_STATUS_HEALTHY" },
                   subtitle: "由 Goja actions.refresh(ctx) 返回",
-                  accent: demoAccent(ctx)
+                  appearance: { accent: demoAccent(ctx), icon: "bolt.circle", variant: "tinted" }
                 }
               }
             ]
