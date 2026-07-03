@@ -52,8 +52,7 @@ globalThis.dashboard = function(ctx) {
       {
         id: "metrics",
         metricGrid: {
-          title: "指标",
-          appearance: { accent: demoAccent(ctx), variant: "tinted", hideBackground: true },
+          appearance: { accent: demoAccent(ctx), container: "none" },
           metrics: [
             { title: "配置名称", value: { text: label }, appearance: { accent: demoAccent(ctx) } },
             { title: "组件数", value: { number: 8, unit: "个", format: "number" }, appearance: { accent: "purple" } },
