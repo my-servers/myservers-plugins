@@ -1,0 +1,70 @@
+{
+  "id": "myservers-demo-nas",
+  "version": "1.0.10",
+  "name": "NAS 示例插件",
+  "description": "用于验证插件市场、配置表单、Goja 渲染和点击动作的示例插件。",
+  "icon": "shippingbox.fill",
+  "min_server_version": "3.0.20",
+  "min_app_version": "3.18",
+  "permissions": [],
+  "config_schema": [
+    {
+      "key": "host_label",
+      "label": "显示名称",
+      "description": "显示在 dashboard 和详情页里的 NAS 名称。",
+      "placeholder": "例如：客厅 NAS",
+      "input": "text",
+      "required": false,
+      "default_value": "NAS"
+    },
+    {
+      "key": "accent",
+      "label": "强调色",
+      "description": "用于卡片和图表的强调色。",
+      "input": "select",
+      "required": false,
+      "default_value": "blue",
+      "options": [
+        {
+          "label": "蓝色",
+          "value": "blue"
+        },
+        {
+          "label": "绿色",
+          "value": "green"
+        },
+        {
+          "label": "紫色",
+          "value": "purple"
+        }
+      ]
+    }
+  ],
+  "commands": [],
+  "entrypoints": {
+    "main": "main.js"
+  },
+  "assets": [
+    {
+      "path": "main.js",
+      "kind": "script"
+    }
+  ],
+  "checksums": {
+    "main.js": "sha256:da25d42c1153fe5f422087db14854b6a787d2c5bc1872a4030f3093f74dba6dd"
+  },
+  "widgets": [
+    {
+      "id": "summary",
+      "name": "NAS 示例小组件",
+      "description": "展示插件返回的通用组件数据。"
+    }
+  ],
+  "background_tasks": [
+    {
+      "id": "refresh-demo",
+      "name": "刷新示例数据",
+      "interval_ms": 60000
+    }
+  ]
+}
