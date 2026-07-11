@@ -66,12 +66,23 @@ function componentExample(id, title, description, component) {
         { id: id + "-description", text: { text: description, style: "PLUGIN_TEXT_STYLE_CAPTION" } },
         {
           id: id + "-code",
-          codeBlock: {
+          disclosure: {
             title: "插件代码",
-            language: "json",
-            wrap: true,
-            code: prettyCode(component),
-            appearance: { accent: "PLUGIN_ACCENT_GRAY" }
+            subtitle: "展开查看可复制的 JSON 示例",
+            expanded: false,
+            appearance: { accent: "PLUGIN_ACCENT_GRAY", variant: "PLUGIN_COMPONENT_VARIANT_TINTED" },
+            children: [
+              {
+                id: id + "-code-block",
+                codeBlock: {
+                  title: "JSON",
+                  language: "json",
+                  wrap: true,
+                  code: prettyCode(component),
+                  appearance: { accent: "PLUGIN_ACCENT_GRAY", hideBackground: true }
+                }
+              }
+            ]
           }
         },
         { id: id + "-render-label", text: { text: "实际渲染", style: "PLUGIN_TEXT_STYLE_CAPTION" } },
