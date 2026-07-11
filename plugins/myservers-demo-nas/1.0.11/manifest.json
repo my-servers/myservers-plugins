@@ -47,7 +47,8 @@
   "assets": [
     {
       "path": "main.js",
-      "kind": "script"
+      "kind": "script",
+      "url": "https://raw.githubusercontent.com/my-servers/myservers-plugins/main/plugins/myservers-demo-nas/1.0.11/main.js?checksum=cfd24546d8e8da7b05dc6d7ccefa30427bdc890607124538abb3ad3edd24ba17"
     }
   ],
   "checksums": {
