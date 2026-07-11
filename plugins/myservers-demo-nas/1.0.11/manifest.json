@@ -48,11 +48,11 @@
     {
       "path": "main.js",
       "kind": "script",
-      "url": "https://raw.githubusercontent.com/my-servers/myservers-plugins/main/plugins/myservers-demo-nas/1.0.11/main.js?checksum=326a5703db0666a79874c008509400f5532c864be7af6f2344d937a04bcb318c"
+      "url": "https://raw.githubusercontent.com/my-servers/myservers-plugins/main/plugins/myservers-demo-nas/1.0.11/main.js?checksum=debf9eedbf036c0fa145f38878d66ac4900ff0e9d92922dcfda3c80f16e39e2d"
     }
   ],
   "checksums": {
-    "main.js": "sha256:326a5703db0666a79874c008509400f5532c864be7af6f2344d937a04bcb318c"
+    "main.js": "sha256:debf9eedbf036c0fa145f38878d66ac4900ff0e9d92922dcfda3c80f16e39e2d"
   },
   "widgets": [
     {
