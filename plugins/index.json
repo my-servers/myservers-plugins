@@ -4,7 +4,7 @@
     "name": "NAS 示例插件",
     "description": "用于验证插件市场、配置表单、Goja 渲染和点击动作的示例插件。",
     "icon": "shippingbox.fill",
-    "latest_version": "1.0.14",
-    "manifest_path": "plugins/myservers-demo-nas/1.0.14/manifest.json"
+    "latest_version": "1.0.15",
+    "manifest_path": "plugins/myservers-demo-nas/1.0.15/manifest.json"
   }
 ]
