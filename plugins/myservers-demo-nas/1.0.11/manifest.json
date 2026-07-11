@@ -48,7 +48,7 @@
     {
       "path": "main.js",
       "kind": "script",
-      "url": "https://raw.githubusercontent.com/my-servers/myservers-plugins/main/plugins/myservers-demo-nas/1.0.11/main.js?checksum=debf9eedbf036c0fa145f38878d66ac4900ff0e9d92922dcfda3c80f16e39e2d"
+      "url": "https://raw.githubusercontent.com/my-servers/myservers-plugins/0ddec2ca134f4a8cf764376e684c66f0e072da68/plugins/myservers-demo-nas/1.0.11/main.js"
     }
   ],
   "checksums": {
