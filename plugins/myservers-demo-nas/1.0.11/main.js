@@ -336,34 +336,48 @@ globalThis.background = function(ctx) {
 globalThis.dashboard = function(ctx) {
   const label = demoLabel(ctx);
   return {
-    title: "NAS 示例插件",
+    title: label + " 控制台",
     components: [
       {
-        id: "summary-card",
+        id: "dashboard-hero",
         card: {
-          appearance: { accent: demoAccent(ctx), variant: "PLUGIN_COMPONENT_VARIANT_TINTED" },
+          appearance: { accent: demoAccent(ctx), icon: "shippingbox.fill", variant: "PLUGIN_COMPONENT_VARIANT_FILLED" },
           onTap: { plugin: { actionId: "openDetail" } },
           children: [
             {
-              id: "summary-title",
+              id: "hero-header",
               stack: {
                 axis: "PLUGIN_LAYOUT_AXIS_HORIZONTAL",
                 spacing: 8,
                 children: [
-                  { id: "summary-icon", icon: { name: "shippingbox.fill", appearance: { accent: demoAccent(ctx) } } },
-                  { id: "summary-text", text: { text: label + " 运行概览", style: "PLUGIN_TEXT_STYLE_TITLE" } },
-                  { id: "summary-state", badge: { text: "运行中", value: { status: "PLUGIN_STATUS_RUNNING" }, appearance: { accent: "PLUGIN_ACCENT_GREEN" } } }
+                  { id: "hero-icon", icon: { name: "sparkles", appearance: { accent: "PLUGIN_ACCENT_TEAL", size: "PLUGIN_COMPONENT_SIZE_LARGE" } } },
+                  { id: "hero-title", text: { text: label + " 已接管", style: "PLUGIN_TEXT_STYLE_TITLE" } },
+                  { id: "hero-state", badge: { text: "在线", value: { status: "PLUGIN_STATUS_RUNNING" }, appearance: { accent: "PLUGIN_ACCENT_GREEN" } } }
+                ]
+              }
+            },
+            { id: "hero-subtitle", text: { text: "存储、服务和网络状态已汇总到一个插件控制台。点击卡片进入完整组件示例。", style: "PLUGIN_TEXT_STYLE_CAPTION" } },
+            {
+              id: "hero-signal-grid",
+              grid: {
+                columns: 3,
+                spacing: 8,
+                appearance: { container: "PLUGIN_CONTAINER_STYLE_NONE" },
+                children: [
+                  { id: "hero-uptime", value: { title: "可用性", value: { text: "99.98%", status: "PLUGIN_STATUS_HEALTHY" }, subtitle: "30 天", appearance: { accent: "PLUGIN_ACCENT_GREEN", icon: "checkmark.seal.fill" } } },
+                  { id: "hero-protection", value: { title: "保护", value: { text: "已同步", status: "PLUGIN_STATUS_RUNNING" }, subtitle: "快照 12 个", appearance: { accent: "PLUGIN_ACCENT_TEAL", icon: "shield.fill" } } },
+                  { id: "hero-latency", value: { title: "延迟", value: { number: 8, unit: "ms", status: "PLUGIN_STATUS_HEALTHY" }, subtitle: "局域网", appearance: { accent: "PLUGIN_ACCENT_PURPLE", icon: "bolt.circle.fill" } } }
                 ]
               }
             },
             {
-              id: "load",
+              id: "storage-pulse",
               progress: {
-                title: "模拟负载",
-                subtitle: "Goja 生成的 dashboard 组件",
-                value: { number: 0.58, unit: "%", format: "PLUGIN_VALUE_FORMAT_PERCENT", status: "PLUGIN_STATUS_HEALTHY" },
-                progress: 0.58,
-                appearance: { accent: demoAccent(ctx), icon: "speedometer" },
+                title: "主存储池",
+                subtitle: "剩余 7.2 TB · 正在低峰期校验",
+                value: { number: 0.64, format: "PLUGIN_VALUE_FORMAT_PERCENT", status: "PLUGIN_STATUS_HEALTHY" },
+                progress: 0.64,
+                appearance: { accent: "PLUGIN_ACCENT_TEAL", icon: "internaldrive.fill" },
                 onTap: { plugin: { actionId: "refresh" } }
               }
             }
@@ -371,24 +385,80 @@ globalThis.dashboard = function(ctx) {
         }
       },
       {
-        id: "metrics",
+        id: "dashboard-signals",
         grid: {
-          columns: 2,
+          columns: 3,
           spacing: 8,
           appearance: { container: "PLUGIN_CONTAINER_STYLE_NONE" },
           children: [
-            { id: "cpu", value: { title: "CPU 使用率", value: { number: 32.4, unit: "%", format: "PLUGIN_VALUE_FORMAT_PERCENT", trend: 5.2, status: "PLUGIN_STATUS_HEALTHY" }, appearance: { accent: demoAccent(ctx), icon: "cpu" }, onTap: { plugin: { actionId: "openDetail" } } } },
-            { id: "memory", value: { title: "内存使用率", subtitle: "系统内存占用情况", value: { number: 56, unit: "%", format: "PLUGIN_VALUE_FORMAT_PERCENT", trend: 3.1, status: "PLUGIN_STATUS_RUNNING" }, appearance: { accent: "PLUGIN_ACCENT_GREEN", icon: "memorychip" } } },
-            { id: "io", value: { title: "磁盘 IO", subtitle: "读写吞吐趋势", value: { number: 32.4, unit: "%", format: "PLUGIN_VALUE_FORMAT_PERCENT", trend: 5.2, status: "PLUGIN_STATUS_HEALTHY" }, appearance: { accent: demoAccent(ctx), icon: "internaldrive" } } }
+            { id: "cpu", value: { title: "CPU", subtitle: "容器负载稳定", value: { number: 0.32, format: "PLUGIN_VALUE_FORMAT_PERCENT", trend: -2.4, status: "PLUGIN_STATUS_HEALTHY" }, appearance: { accent: demoAccent(ctx), icon: "cpu" }, onTap: { plugin: { actionId: "openDetail" } } } },
+            { id: "memory", value: { title: "内存", subtitle: "缓存命中高", value: { number: 0.56, format: "PLUGIN_VALUE_FORMAT_PERCENT", trend: 3.1, status: "PLUGIN_STATUS_RUNNING" }, appearance: { accent: "PLUGIN_ACCENT_GREEN", icon: "memorychip" } } },
+            { id: "network", value: { title: "网络", subtitle: "上行空闲", value: { number: 84, unit: "MB/s", trend: 12.8, status: "PLUGIN_STATUS_HEALTHY" }, appearance: { accent: "PLUGIN_ACCENT_ORANGE", icon: "network" } } }
           ]
         }
       },
       {
-        id: "open-detail",
+        id: "capacity-board",
+        card: {
+          appearance: { accent: "PLUGIN_ACCENT_TEAL", variant: "PLUGIN_COMPONENT_VARIANT_TINTED" },
+          children: [
+            {
+              id: "capacity-title",
+              stack: {
+                axis: "PLUGIN_LAYOUT_AXIS_HORIZONTAL",
+                spacing: 8,
+                children: [
+                  { id: "capacity-icon", icon: { name: "chart.pie.fill", appearance: { accent: "PLUGIN_ACCENT_TEAL" } } },
+                  { id: "capacity-text", text: { text: "容量脉冲", style: "PLUGIN_TEXT_STYLE_TITLE" } },
+                  { id: "capacity-badge", badge: { text: "健康", value: { status: "PLUGIN_STATUS_HEALTHY" }, appearance: { accent: "PLUGIN_ACCENT_GREEN" } } }
+                ]
+              }
+            },
+            {
+              id: "capacity-gauge",
+              segmentedGauge: {
+                title: "存储分布",
+                segments: [
+                  { label: "媒体库", value: 42, appearance: { accent: demoAccent(ctx) } },
+                  { label: "备份", value: 28, appearance: { accent: "PLUGIN_ACCENT_TEAL" } },
+                  { label: "可用", value: 30, appearance: { accent: "PLUGIN_ACCENT_GRAY" } }
+                ],
+                centerValue: { number: 0.70, format: "PLUGIN_VALUE_FORMAT_PERCENT" },
+                showLegend: true,
+                appearance: { accent: "PLUGIN_ACCENT_TEAL" }
+              }
+            },
+            {
+              id: "capacity-chart",
+              chart: {
+                title: "24h 活跃度",
+                kind: "PLUGIN_CHART_KIND_AREA",
+                points: demoPoints(),
+                options: { min: 0, max: 100, showLabels: false },
+                appearance: { accent: demoAccent(ctx) }
+              }
+            }
+          ]
+        }
+      },
+      {
+        id: "service-lane",
+        list: {
+          title: "今日动作",
+          items: [
+            { title: "媒体索引", subtitle: "Jellyfin 库已完成扫描", value: { text: "完成", status: "PLUGIN_STATUS_HEALTHY" }, appearance: { accent: "PLUGIN_ACCENT_GREEN", icon: "play.rectangle.fill" } },
+            { title: "备份窗口", subtitle: "Time Machine 等待低峰期开启", value: { text: "22:30" }, appearance: { accent: "PLUGIN_ACCENT_PURPLE", icon: "clock.arrow.circlepath" } },
+            { title: "Docker 服务", subtitle: "12 个容器运行，1 个待更新", value: { text: "查看" }, appearance: { accent: demoAccent(ctx), icon: "shippingbox" }, onTap: { plugin: { actionId: "openDetail" } } }
+          ],
+          appearance: { accent: demoAccent(ctx), variant: "PLUGIN_COMPONENT_VARIANT_TINTED" }
+        }
+      },
+      {
+        id: "open-control-room",
         button: {
-          title: "打开详情",
-          subtitle: "测试 toast + navigate effects",
-          appearance: { accent: "PLUGIN_ACCENT_BLUE", icon: "arrow.right.circle", variant: "PLUGIN_COMPONENT_VARIANT_FILLED" },
+          title: "进入 NAS 控制台",
+          subtitle: "查看所有组件示例和插件代码",
+          appearance: { accent: demoAccent(ctx), icon: "arrow.up.right.circle.fill", variant: "PLUGIN_COMPONENT_VARIANT_FILLED" },
           onTap: { plugin: { actionId: "openDetail" } }
         }
       }
