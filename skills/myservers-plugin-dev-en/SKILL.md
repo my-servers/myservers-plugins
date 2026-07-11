@@ -1,15 +1,34 @@
 ---
 name: myservers-plugin-dev-en
-description: English guide for agents to create, update, validate, publish, and install MyServers Goja plugins from the myservers-plugins repository, covering manifest files, marketplace index, server installation, dashboard/detail/widget rendering, actions, background tasks, config forms, permissions, runtime APIs, component DSL, checksums, and release flow.
+description: Use when an English-speaking user asks an agent to create, update, install, or publish a MyServers Goja plugin, including local development plugins, stable marketplace plugins, manifest files, dashboard, detail pages, widgets, actions, background tasks, permissions, component DSL, checksums, and validation.
 ---
 
 # MyServers Goja Plugin Development
 
-This skill lets a user ask an agent to build a complete MyServers plugin from a product request. The expected output is a versioned plugin in the current plugin repository that can be downloaded from the marketplace and installed into a MyServers server.
+This skill lets a user ask an agent to build a complete MyServers Goja plugin from a product request. The expected output is a plugin that can be installed into a MyServers server.
+
+There are two plugin channels:
+
+- Local development plugins: for self-developed, fast iteration, not-yet-verified plugins. By default, write them to the server runtime directory at `~/.myservers/data/dev-plugins/<plugin-id>/`.
+- Stable marketplace plugins: for verified plugins that other users should download. Write them to the plugin repository under `plugins/<plugin-id>/<version>/`, update `plugins/index.json`, and push to GitHub.
 
 ## Repository Layout
 
-Work from the plugin repository root:
+Local development plugin layout:
+
+```text
+~/.myservers/data/dev-plugins/<plugin-id>/manifest.json
+~/.myservers/data/dev-plugins/<plugin-id>/main.js
+```
+
+Version directories are also supported:
+
+```text
+~/.myservers/data/dev-plugins/<plugin-id>/<version>/manifest.json
+~/.myservers/data/dev-plugins/<plugin-id>/<version>/main.js
+```
+
+For stable marketplace plugins, work from the plugin repository root:
 
 ```text
 plugins/index.json
@@ -17,7 +36,7 @@ plugins/<plugin-id>/<version>/manifest.json
 plugins/<plugin-id>/<version>/main.js
 ```
 
-The version directory is the release unit. For an update, create a new version directory instead of editing an already published version in place.
+The version directory is the stable release unit. For an update, create a new version directory instead of editing an already published version in place.
 
 ## Workflow
 
@@ -25,22 +44,46 @@ The version directory is the release unit. For an update, create a new version d
    - What to show: dashboard, detail page, iOS widget.
    - What to operate: buttons, forms, menus, confirmations, actions.
    - What data source to use: config, HTTP, Unix-socket HTTP, shell command templates, cache, background refresh.
-2. Create or copy a version directory:
+2. Choose the plugin channel:
+   - Self-developed, debugging, not yet verified: use a local development plugin.
+   - Stable distribution to other users: use a stable marketplace plugin.
+3. Create the directory:
+   - Local development: `~/.myservers/data/dev-plugins/<plugin-id>/`
    - New plugin: `plugins/<plugin-id>/1.0.0/`
    - Existing plugin: copy the latest version to the next version, such as `1.0.1`.
-3. Write `manifest.json`:
-   - Declare plugin metadata, entrypoints, assets, checksums, config schema, permissions, commands, widgets, and background tasks.
-4. Write `main.js`:
+4. Write `manifest.json`:
+   - Local development: declare plugin metadata, entrypoints, config schema, permissions, commands, widgets, and background tasks; `assets` and `checksums` are not required.
+   - Stable marketplace: also declare asset URLs and checksums.
+5. Write `main.js`:
    - Implement at least `globalThis.dashboard(ctx)`.
    - Add `detail`, `widget`, `background`, and `globalThis.actions` when needed.
-5. Compute the SHA-256 checksum for `main.js` and update `manifest.checksums`.
-6. Update `plugins/index.json` with `latest_version` and `manifest_path`.
-7. Validate JSON, asset paths, and checksums.
-8. Commit and push the plugin repository. The app can only download what has been pushed.
+6. Validate local development:
+   - Open the "Local Development Plugins" section in the app plugin marketplace and refresh the list.
+   - Select the plugin, review permissions/config, install it, then verify dashboard, detail pages, widgets, and actions.
+   - After editing `main.js`, trigger rendering again or reinstall; development mode reloads the local script before rendering.
+7. Validate stable publishing:
+   - Compute the SHA-256 checksum for `main.js` and update `manifest.checksums`.
+   - Update `plugins/index.json` with `latest_version` and `manifest_path`.
+   - Validate JSON, asset paths, and checksums.
+   - Commit and push the plugin repository. The app can only download the stable marketplace version after it has been pushed.
 
 ## How A Plugin Is Installed Into A Server
 
-Do not tell users to copy files directly into the server runtime. The standard installation path is:
+### Local Development Plugins
+
+Local development plugins do not use GitHub and do not require checksums. The flow is:
+
+1. The agent creates `~/.myservers/data/dev-plugins/<plugin-id>/manifest.json` and `main.js` in the server runtime directory.
+2. The app plugin marketplace opens "Local Development Plugins" and refreshes the list.
+3. The user selects the local plugin, approves permissions, fills config values, and installs it.
+4. The app sends the local manifest, config, and approved permissions to the MyServers server.
+5. The server loads the Goja runtime directly from the local `main.js` and reloads the script before rendering in development mode.
+
+If the user is developing against another server, write files into that target server's own `~/.myservers/data/dev-plugins/`. Do not write to the current agent workspace or plugin repository and treat that as installed.
+
+### Stable Marketplace Plugins
+
+Stable marketplace plugins are for public download and must use repository assets plus checksums:
 
 1. Push the plugin repository to GitHub.
 2. `plugins/index.json` exposes the marketplace entry.
@@ -50,11 +93,33 @@ Do not tell users to copy files directly into the server runtime. The standard i
 6. The server downloads `assets`, verifies `checksums`, and loads the Goja runtime.
 7. Dashboard, detail pages, and widgets execute `main.js` on the server and render the returned component data.
 
-Plugin-only JavaScript or manifest changes usually do not require server changes. Server/app changes are only needed for new protocol fields, new component types, or new runtime capabilities.
+Stable marketplace JavaScript or manifest changes must be pushed to the plugin repository. Local development plugin changes do not need a push, but the files must be written to the target server's dev-plugins directory. Plugin-only JavaScript or manifest changes usually do not require server changes. Server/app changes are only needed for new protocol fields, new component types, or new runtime capabilities.
 
 ## manifest.json
 
-Minimal example:
+Local development minimal example:
+
+```json
+{
+  "id": "demo-status",
+  "version": "1.0.0",
+  "name": "Demo Status",
+  "description": "Shows a service status plugin.",
+  "icon": "server.rack",
+  "min_server_version": "3.0.20",
+  "min_app_version": "3.18",
+  "permissions": [],
+  "config_schema": [],
+  "commands": [],
+  "entrypoints": {
+    "main": "main.js"
+  },
+  "widgets": [],
+  "background_tasks": []
+}
+```
+
+Stable marketplace example:
 
 ```json
 {
@@ -556,7 +621,13 @@ globalThis.actions = {
 
 ## Validation Commands
 
-Run from the plugin repository root:
+For a local development plugin, validate JSON first:
+
+```bash
+node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")); console.log("manifest ok")' ~/.myservers/data/dev-plugins/<plugin-id>/manifest.json
+```
+
+For a stable marketplace plugin, run from the plugin repository root:
 
 ```bash
 node -e 'JSON.parse(require("fs").readFileSync("plugins/index.json", "utf8")); console.log("index ok")'
@@ -594,7 +665,9 @@ shasum -a 256 plugins/<plugin-id>/<version>/main.js
 
 ## Release Requirements
 
-After plugin changes:
+Local development plugins do not require a plugin repository commit; confirm the files are in the target server's `~/.myservers/data/dev-plugins/<plugin-id>/`, then refresh and install from the app local development plugin list.
+
+After stable marketplace plugin changes:
 
 ```bash
 git status --short
@@ -610,4 +683,3 @@ git add skills
 git commit -m "Update plugin development skills"
 git push
 ```
-

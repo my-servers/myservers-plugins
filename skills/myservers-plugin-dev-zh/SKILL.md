@@ -1,15 +1,34 @@
 ---
 name: myservers-plugin-dev-zh
-description: 用中文指导 agent 在 myservers-plugins 插件仓库中根据用户需求创建、更新、验证并发布 MyServers Goja 插件，覆盖 manifest、市场索引、安装到服务器、Dashboard、详情页、小组件、Action、后台任务、配置表单、权限 API、组件 DSL、checksum 和发布流程。
+description: Use when a Chinese-speaking user asks an agent to create, update, install, or publish a MyServers Goja plugin, including local development plugins, stable marketplace plugins, manifest files, Dashboard, detail pages, widgets, actions, background tasks, permissions, component DSL, checksums, and validation.
 ---
 
 # MyServers Goja 插件开发
 
-这个 Skill 的目标是让用户可以直接对 agent 说“帮我做一个 XXX 插件”，agent 能在当前插件仓库里创建完整、可下载、可安装的 MyServers 插件。
+这个 Skill 的目标是让用户可以直接对 agent 说“帮我做一个 XXX 插件”，agent 能创建可在 MyServers 服务器中安装和运行的 Goja 插件。
+
+有两条插件通道：
+
+- 本地开发插件：用于用户自己开发、快速验证、不经过 GitHub 的插件。默认写入服务器运行目录 `~/.myservers/data/dev-plugins/<plugin-id>/`。
+- 稳定市场插件：用于已经验证、准备给其他用户下载的插件。写入插件仓库 `plugins/<plugin-id>/<version>/`，更新 `plugins/index.json`，并推送到 GitHub。
 
 ## 仓库结构
 
-从插件仓库根目录工作：
+本地开发插件目录：
+
+```text
+~/.myservers/data/dev-plugins/<plugin-id>/manifest.json
+~/.myservers/data/dev-plugins/<plugin-id>/main.js
+```
+
+也支持版本目录：
+
+```text
+~/.myservers/data/dev-plugins/<plugin-id>/<version>/manifest.json
+~/.myservers/data/dev-plugins/<plugin-id>/<version>/main.js
+```
+
+稳定市场插件从插件仓库根目录工作：
 
 ```text
 plugins/index.json
@@ -17,7 +36,7 @@ plugins/<plugin-id>/<version>/manifest.json
 plugins/<plugin-id>/<version>/main.js
 ```
 
-插件发布到市场的最小单位是一个版本目录。更新已发布插件时，创建新版本目录，不要直接改旧版本。
+稳定发布的最小单位是一个版本目录。更新已发布插件时，创建新版本目录，不要直接改旧版本。
 
 ## 工作流程
 
@@ -25,22 +44,46 @@ plugins/<plugin-id>/<version>/main.js
    - 需要展示什么：dashboard、详情页、iOS 小组件。
    - 需要操作什么：按钮、表单、菜单、确认框、action。
    - 需要数据来源什么：配置、HTTP、Unix Socket HTTP、Shell 命令、缓存、后台刷新。
-2. 创建或复制版本目录：
+2. 选择插件通道：
+   - 用户自己开发、调试、未验证：走本地开发插件。
+   - 要给其他用户稳定下载：走稳定市场插件。
+3. 创建目录：
+   - 本地开发：`~/.myservers/data/dev-plugins/<plugin-id>/`
    - 新插件：`plugins/<plugin-id>/1.0.0/`
    - 更新插件：从最新版本复制到下一个版本，例如 `1.0.1`。
-3. 编写 `manifest.json`：
-   - 声明插件信息、入口文件、资源、checksum、配置、权限、命令、小组件、后台任务。
-4. 编写 `main.js`：
+4. 编写 `manifest.json`：
+   - 本地开发：声明插件信息、入口文件、配置、权限、命令、小组件、后台任务；不需要 `assets` 和 `checksums`。
+   - 稳定市场：额外声明资源 URL 和 checksum。
+5. 编写 `main.js`：
    - 至少实现 `globalThis.dashboard(ctx)`。
    - 按需实现 `detail`、`widget`、`background`、`globalThis.actions`。
-5. 计算 `main.js` 的 SHA-256，更新 manifest 的 `checksums.main.js`。
-6. 更新 `plugins/index.json` 的 `latest_version` 和 `manifest_path`。
-7. 验证 JSON、资源路径和 checksum。
-8. 提交并推送插件仓库。用户必须能从仓库下载插件后，才能在 App 里验证。
+6. 本地开发验证：
+   - 在 App 插件市场的“本地开发插件”区域刷新列表。
+   - 选择插件，检查权限和配置，安装后验证 Dashboard、详情页、小组件和 action。
+   - 修改 `main.js` 后重新触发渲染或重新安装；开发模式会从本地文件重新加载脚本。
+7. 稳定发布验证：
+   - 计算 `main.js` 的 SHA-256，更新 manifest 的 `checksums.main.js`。
+   - 更新 `plugins/index.json` 的 `latest_version` 和 `manifest_path`。
+   - 验证 JSON、资源路径和 checksum。
+   - 提交并推送插件仓库。用户必须能从仓库下载插件后，才能在 App 里验证稳定市场版本。
 
 ## 如何安装到服务器
 
-插件不是直接复制到服务器目录。标准流程是：
+### 本地开发插件
+
+本地开发插件不走 GitHub，不需要 checksum。流程是：
+
+1. agent 在服务器运行目录创建 `~/.myservers/data/dev-plugins/<plugin-id>/manifest.json` 和 `main.js`。
+2. App 插件市场打开“本地开发插件”，刷新列表。
+3. 用户选择本地插件，确认权限、填写配置并安装。
+4. App 把本地 manifest、配置和已授权权限发送给 MyServers 服务器。
+5. 服务器直接从本地 `main.js` 加载 Goja runtime，并在开发模式下渲染前重新读取脚本。
+
+如果用户是在另一台服务器上开发，必须把文件写入目标服务器自己的 `~/.myservers/data/dev-plugins/`，不要写到当前 agent 工作区或插件仓库里假装已安装。
+
+### 稳定市场插件
+
+稳定市场插件用于公开下载，必须走仓库和 checksum：
 
 1. 插件仓库推送到 GitHub。
 2. `plugins/index.json` 暴露插件市场条目。
@@ -50,11 +93,33 @@ plugins/<plugin-id>/<version>/main.js
 6. 服务器下载 `assets` 里的脚本，校验 `checksums`，加载 Goja runtime。
 7. Dashboard、详情页和小组件通过服务器执行 `main.js` 返回组件数据。
 
-因此，插件 JS 或 manifest 改动后必须推送插件仓库。仅改插件通常不需要改服务器代码；只有新增协议、组件、权限能力时才需要改 MyServers 服务端和 App。
+稳定市场插件的 JS 或 manifest 改动后必须推送插件仓库。本地开发插件改动不需要推送，但文件必须写入目标服务器的 dev-plugins 目录。仅改插件通常不需要改服务器代码；只有新增协议、组件、权限能力时才需要改 MyServers 服务端和 App。
 
 ## manifest.json
 
-最小示例：
+本地开发最小示例：
+
+```json
+{
+  "id": "demo-status",
+  "version": "1.0.0",
+  "name": "Demo Status",
+  "description": "展示一个服务状态插件。",
+  "icon": "server.rack",
+  "min_server_version": "3.0.20",
+  "min_app_version": "3.18",
+  "permissions": [],
+  "config_schema": [],
+  "commands": [],
+  "entrypoints": {
+    "main": "main.js"
+  },
+  "widgets": [],
+  "background_tasks": []
+}
+```
+
+稳定市场示例：
 
 ```json
 {
@@ -556,7 +621,13 @@ globalThis.actions = {
 
 ## 验证命令
 
-从插件仓库根目录执行：
+本地开发插件先验证 JSON：
+
+```bash
+node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")); console.log("manifest ok")' ~/.myservers/data/dev-plugins/<plugin-id>/manifest.json
+```
+
+稳定市场插件从插件仓库根目录执行：
 
 ```bash
 node -e 'JSON.parse(require("fs").readFileSync("plugins/index.json", "utf8")); console.log("index ok")'
@@ -594,7 +665,9 @@ shasum -a 256 plugins/<plugin-id>/<version>/main.js
 
 ## 发布要求
 
-插件改动完成后：
+本地开发插件不需要提交插件仓库；确认文件已经写入目标服务器的 `~/.myservers/data/dev-plugins/<plugin-id>/`，然后在 App 本地开发插件列表刷新并安装。
+
+稳定市场插件改动完成后：
 
 ```bash
 git status --short
@@ -610,4 +683,3 @@ git add skills
 git commit -m "Update plugin development skills"
 git push
 ```
-
