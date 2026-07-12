@@ -4,7 +4,13 @@
     "name": "NAS 示例插件",
     "description": "用于验证插件市场、配置表单、Goja 渲染和点击动作的示例插件。",
     "icon": "shippingbox.fill",
-    "latest_version": "1.0.21",
-    "manifest_path": "plugins/myservers-demo-nas/1.0.21/manifest.json"
+    "demo_card": {
+      "tagline": "用真实插件页面体验组件、半弹层和示例代码。",
+      "badges": ["31 个组件", "原生半弹层"],
+      "accent": "purple",
+      "action_title": "查看示例"
+    },
+    "latest_version": "1.0.22",
+    "manifest_path": "plugins/myservers-demo-nas/1.0.22/manifest.json"
   }
 ]
