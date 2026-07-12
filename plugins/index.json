@@ -18,7 +18,7 @@
         { "icon": "bolt.shield.fill", "label": "Action", "value": "受控" }
       ]
     },
-    "latest_version": "1.0.23",
-    "manifest_path": "plugins/myservers-demo-nas/1.0.23/manifest.json"
+    "latest_version": "1.0.24",
+    "manifest_path": "plugins/myservers-demo-nas/1.0.24/manifest.json"
   }
 ]
