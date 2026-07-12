@@ -18,7 +18,7 @@
         { "icon": "curlybraces", "label": "示例代码", "value": "JSON" }
       ]
     },
-    "latest_version": "1.0.25",
-    "manifest_path": "plugins/myservers-demo-nas/1.0.25/manifest.json"
+    "latest_version": "1.0.26",
+    "manifest_path": "plugins/myservers-demo-nas/1.0.26/manifest.json"
   }
 ]

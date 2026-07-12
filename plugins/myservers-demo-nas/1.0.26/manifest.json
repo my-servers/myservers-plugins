@@ -1,0 +1,74 @@
+{
+  "id": "myservers-demo-nas",
+  "version": "1.0.26",
+  "name": "NAS 示例插件",
+  "description": "用于验证插件市场、配置表单、Goja 渲染和点击动作的示例插件。",
+  "icon": "shippingbox.fill",
+  "demo_card": {
+    "background_colors": ["#4338CA", "#7C3AED", "#0F172A"],
+    "overlay_opacity": 0.42,
+    "hero": {
+      "icon": "puzzlepiece.extension.fill",
+      "title": "MyServers 插件组件示例",
+      "subtitle": "查看插件组件、原生半弹层和示例代码"
+    },
+    "highlights": [
+      { "icon": "square.stack.3d.up.fill", "label": "组件", "value": "31 个" },
+      { "icon": "rectangle.bottomhalf.inset.filled", "label": "半弹层", "value": "3 档" },
+      { "icon": "curlybraces", "label": "示例代码", "value": "JSON" }
+    ]
+  },
+  "min_server_version": "3.0.22",
+  "min_app_version": "3.20",
+  "permissions": [],
+  "config_schema": [
+    {
+      "key": "host_label",
+      "label": "显示名称",
+      "description": "显示在 dashboard 和详情页里的 NAS 名称。",
+      "placeholder": "例如：客厅 NAS",
+      "input": "text",
+      "required": false,
+      "default_value": "NAS"
+    },
+    {
+      "key": "accent",
+      "label": "强调色",
+      "description": "用于卡片和图表的强调色。",
+      "input": "select",
+      "required": false,
+      "default_value": "blue",
+      "options": [
+        { "label": "蓝色", "value": "blue" },
+        { "label": "绿色", "value": "green" },
+        { "label": "紫色", "value": "purple" }
+      ]
+    }
+  ],
+  "commands": [],
+  "entrypoints": { "main": "main.js" },
+  "assets": [
+    {
+      "path": "main.js",
+      "kind": "script",
+      "url": "https://raw.githubusercontent.com/my-servers/myservers-plugins/ffed4324dc6623e24d085a01d6e70999c784dbcf/plugins/myservers-demo-nas/1.0.23/main.js"
+    }
+  ],
+  "checksums": {
+    "main.js": "sha256:32f4fa275bd2e9e0abaee1cd1af6902bee548a1cc2033bbe7398668ead4621dd"
+  },
+  "widgets": [
+    {
+      "id": "summary",
+      "name": "NAS 示例小组件",
+      "description": "展示插件返回的通用组件数据。"
+    }
+  ],
+  "background_tasks": [
+    {
+      "id": "refresh-demo",
+      "name": "刷新示例数据",
+      "interval_ms": 60000
+    }
+  ]
+}
