@@ -5,12 +5,20 @@
     "description": "用于验证插件市场、配置表单、Goja 渲染和点击动作的示例插件。",
     "icon": "shippingbox.fill",
     "demo_card": {
-      "tagline": "用真实插件页面体验组件、半弹层和示例代码。",
-      "badges": ["31 个组件", "原生半弹层"],
-      "accent": "purple",
-      "action_title": "查看示例"
+      "background_colors": ["#4338CA", "#7C3AED", "#0F172A"],
+      "overlay_opacity": 0.42,
+      "hero": {
+        "icon": "square.grid.2x2.fill",
+        "title": "组件控制台",
+        "subtitle": "插件安装后的 Dashboard 预览"
+      },
+      "highlights": [
+        { "icon": "square.stack.3d.up.fill", "label": "组件", "value": "31" },
+        { "icon": "rectangle.bottomhalf.inset.filled", "label": "半弹层", "value": "3 档" },
+        { "icon": "bolt.shield.fill", "label": "Action", "value": "受控" }
+      ]
     },
-    "latest_version": "1.0.22",
-    "manifest_path": "plugins/myservers-demo-nas/1.0.22/manifest.json"
+    "latest_version": "1.0.23",
+    "manifest_path": "plugins/myservers-demo-nas/1.0.23/manifest.json"
   }
 ]
