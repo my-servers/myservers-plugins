@@ -216,7 +216,7 @@ function demoComponentCatalog(ctx, label) {
   };
   const gaugeChartComponent = {
     id: "render-gauge-chart",
-    chart: { title: "Chart Gauge", kind: "PLUGIN_CHART_KIND_GAUGE", points: [{ label: "使用率", value: 58 }], options: { min: 0, max: 100 }, appearance: { accent: demoAccent(ctx) } }
+    chart: { title: "Chart Gauge", kind: "PLUGIN_CHART_KIND_GAUGE", points: [{ label: "使用率", value: 58 }], options: { min: 0, max: 100, hideRange: true }, appearance: { accent: demoAccent(ctx) } }
   };
   const segmentedGaugeComponent = {
     id: "render-segmented-gauge",
