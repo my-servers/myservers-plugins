@@ -401,33 +401,24 @@ globalThis.dashboard = function(ctx) {
     title: "插件开发示例",
     components: [
       {
-        id: "plugin-intro-card",
-        card: {
-          appearance: { accent: demoAccent(ctx), icon: "puzzlepiece.extension.fill", variant: "PLUGIN_COMPONENT_VARIANT_FILLED" },
-          onTap: { plugin: { actionId: "openDetail" } },
+        id: "plugin-intro-header",
+        stack: {
+          axis: "PLUGIN_LAYOUT_AXIS_HORIZONTAL",
+          spacing: 8,
           children: [
-            {
-              id: "plugin-intro-header",
-              stack: {
-                axis: "PLUGIN_LAYOUT_AXIS_HORIZONTAL",
-                spacing: 8,
-                children: [
-                  { id: "plugin-intro-icon", icon: { name: "puzzlepiece.extension.fill", appearance: { accent: "PLUGIN_ACCENT_TEAL", size: "PLUGIN_COMPONENT_SIZE_LARGE" } } },
-                  { id: "plugin-intro-title", text: { text: "MyServers 插件组件示例", style: "PLUGIN_TEXT_STYLE_TITLE" } },
-                  { id: "plugin-intro-badge", badge: { text: "31 个组件", appearance: { accent: "PLUGIN_ACCENT_PURPLE" } } }
-                ]
-              }
-            },
-            { id: "plugin-intro-summary", text: { text: "查看插件组件、原生半弹层和示例代码。", style: "PLUGIN_TEXT_STYLE_BODY" } },
-            {
-              id: "plugin-intro-action",
-              button: {
-                title: "查看示例",
-                appearance: { accent: demoAccent(ctx), icon: "arrow.right.circle.fill", variant: "PLUGIN_COMPONENT_VARIANT_FILLED" },
-                onTap: { plugin: { actionId: "openDetail" } }
-              }
-            }
+            { id: "plugin-intro-icon", icon: { name: "puzzlepiece.extension.fill", appearance: { accent: "PLUGIN_ACCENT_TEAL", size: "PLUGIN_COMPONENT_SIZE_LARGE" } } },
+            { id: "plugin-intro-title", text: { text: "MyServers 插件组件示例", style: "PLUGIN_TEXT_STYLE_TITLE" } },
+            { id: "plugin-intro-badge", badge: { text: "31 个组件", appearance: { accent: "PLUGIN_ACCENT_PURPLE" } } }
           ]
+        }
+      },
+      { id: "plugin-intro-summary", text: { text: "查看插件组件、原生半弹层和示例代码。", style: "PLUGIN_TEXT_STYLE_BODY" } },
+      {
+        id: "plugin-intro-action",
+        button: {
+          title: "查看示例",
+          appearance: { accent: demoAccent(ctx), icon: "arrow.right.circle.fill", variant: "PLUGIN_COMPONENT_VARIANT_FILLED" },
+          onTap: { plugin: { actionId: "openDetail" } }
         }
       }
     ]
