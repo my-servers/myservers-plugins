@@ -6,11 +6,24 @@
     "icon": "shippingbox.fill",
     "demo_cards": [
       {
-        "style": "dashboard",
-        "description": "仪表盘卡片",
+        "style": "components",
+        "description": "折线图 · 徽标",
         "dashboard_title": "插件开发示例",
         "badge_text": "31 个组件",
         "action_title": "查看示例",
+        "components": [
+          { "kind": "badge", "text": "实时", "accent": "green" },
+          {
+            "kind": "line", "title": "CPU 使用率", "icon": "cpu", "accent": "blue", "unit": "%",
+            "min": 0, "max": 100,
+            "points": [
+              { "label": "00:00", "value": 28 }, { "label": "04:00", "value": 36 },
+              { "label": "08:00", "value": 31 }, { "label": "12:00", "value": 52 },
+              { "label": "16:00", "value": 44 }, { "label": "20:00", "value": 63 },
+              { "label": "24:00", "value": 48 }
+            ]
+          }
+        ],
         "background_colors": ["#4338CA", "#7C3AED", "#0F172A"],
         "overlay_opacity": 0.42,
         "hero": {
@@ -25,11 +38,22 @@
         ]
       },
       {
-        "style": "marketing",
-        "description": "功能宣传卡片",
+        "style": "components",
+        "description": "环形图 · 徽标",
         "dashboard_title": "原生交互示例",
         "badge_text": "3 档高度",
         "action_title": "查看半弹层",
+        "components": [
+          { "kind": "badge", "text": "存储健康", "accent": "green" },
+          {
+            "kind": "donut", "title": "存储空间", "icon": "internaldrive.fill", "accent": "teal", "unit": "GB",
+            "points": [
+              { "label": "已用", "value": 56 },
+              { "label": "缓存", "value": 28 },
+              { "label": "可用", "value": 16 }
+            ]
+          }
+        ],
         "background_colors": ["#0891B2", "#0F766E", "#0F172A"],
         "overlay_opacity": 0.42,
         "hero": {
@@ -44,11 +68,19 @@
         ]
       },
       {
-        "style": "metrics",
-        "description": "指标数据卡片",
+        "style": "components",
+        "description": "仪表图 · 徽标",
         "dashboard_title": "数据组件示例",
         "badge_text": "图表与表单",
         "action_title": "浏览组件",
+        "components": [
+          { "kind": "badge", "text": "运行正常", "accent": "green" },
+          {
+            "kind": "gauge", "title": "服务健康度", "icon": "gauge.with.dots.needle.67percent",
+            "accent": "indigo", "min": 0, "max": 100,
+            "points": [{ "label": "健康度", "value": 86 }]
+          }
+        ],
         "background_colors": ["#2563EB", "#4F46E5", "#111827"],
         "overlay_opacity": 0.42,
         "hero": {
