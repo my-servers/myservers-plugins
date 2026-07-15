@@ -454,18 +454,20 @@ Supported components and examples:
 // Disclosure
 { id: "more", disclosure: { title: "Advanced", expanded: false, children: [] } }
 
-// State Block
-{ id: "empty", stateBlock: { kind: "PLUGIN_STATE_KIND_EMPTY", title: "No data" } }
+// State Block: every component uses appearance.iconSource for icons
+{ id: "empty", stateBlock: { kind: "PLUGIN_STATE_KIND_EMPTY", title: "No data", appearance: { iconSource: { systemName: "tray", url: "https://example.com/empty.png" } } } }
 
 // Code Block
 { id: "raw", codeBlock: { title: "JSON", code: "{}", language: "json", wrap: true } }
 
 // Icon / Image / Divider / Spacer
-{ id: "icon", icon: { name: "shippingbox.fill" } }
+{ id: "icon", icon: { appearance: { iconSource: { systemName: "shippingbox.fill", url: "https://example.com/icon.png" } } } }
 { id: "image", image: { url: "https://example.com/a.png", mode: "fit" } }
 { id: "line", divider: {} }
 { id: "gap", spacer: { length: 12 } }
 ```
+
+Define icons consistently with `appearance.iconSource`. `systemName` is an SF Symbols name. `url` accepts HTTP/HTTPS only and takes display priority; an invalid or failed URL falls back to `systemName`. Keep `appearance.icon`, `icon.name/url`, and `stateBlock.iconUrl` only for compatibility with existing plugins.
 
 ## Actions
 

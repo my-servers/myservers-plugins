@@ -454,18 +454,20 @@ Goja 返回的是 protobuf JSON，组件必须使用 oneof 形态和 lowerCamelC
 // Disclosure
 { id: "more", disclosure: { title: "高级", expanded: false, children: [] } }
 
-// State Block
-{ id: "empty", stateBlock: { kind: "PLUGIN_STATE_KIND_EMPTY", title: "暂无数据" } }
+// State Block：所有组件统一通过 appearance.iconSource 使用图标
+{ id: "empty", stateBlock: { kind: "PLUGIN_STATE_KIND_EMPTY", title: "暂无数据", appearance: { iconSource: { systemName: "tray", url: "https://example.com/empty.png" } } } }
 
 // Code Block
 { id: "raw", codeBlock: { title: "JSON", code: "{}", language: "json", wrap: true } }
 
 // Icon / Image / Divider / Spacer
-{ id: "icon", icon: { name: "shippingbox.fill" } }
+{ id: "icon", icon: { appearance: { iconSource: { systemName: "shippingbox.fill", url: "https://example.com/icon.png" } } } }
 { id: "image", image: { url: "https://example.com/a.png", mode: "fit" } }
 { id: "line", divider: {} }
 { id: "gap", spacer: { length: 12 } }
 ```
+
+图标统一写在 `appearance.iconSource`：`systemName` 是 SF Symbols 名称，`url` 仅支持 HTTP/HTTPS 且优先展示；URL 无效或加载失败时回退到 `systemName`。旧的 `appearance.icon`、`icon.name/url`、`stateBlock.iconUrl` 仅用于兼容已有插件。
 
 ## Action 能力
 
