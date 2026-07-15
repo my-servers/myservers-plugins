@@ -4,24 +4,62 @@
     "name": "NAS 示例插件",
     "description": "用于验证插件市场、配置表单、Goja 渲染和点击动作的示例插件。",
     "icon": "shippingbox.fill",
-    "demo_card": {
-      "style": "dashboard",
-      "dashboard_title": "插件开发示例",
-      "badge_text": "31 个组件",
-      "action_title": "查看示例",
-      "background_colors": ["#4338CA", "#7C3AED", "#0F172A"],
-      "overlay_opacity": 0.42,
-      "hero": {
-        "icon": "puzzlepiece.extension.fill",
-        "title": "MyServers 插件组件示例",
-        "subtitle": "查看插件组件、原生半弹层和示例代码"
+    "demo_cards": [
+      {
+        "style": "dashboard",
+        "dashboard_title": "插件开发示例",
+        "badge_text": "31 个组件",
+        "action_title": "查看示例",
+        "background_colors": ["#4338CA", "#7C3AED", "#0F172A"],
+        "overlay_opacity": 0.42,
+        "hero": {
+          "icon": "puzzlepiece.extension.fill",
+          "title": "MyServers 插件组件示例",
+          "subtitle": "查看插件组件、原生半弹层和示例代码"
+        },
+        "highlights": [
+          { "icon": "square.stack.3d.up.fill", "label": "组件", "value": "31 个" },
+          { "icon": "rectangle.bottomhalf.inset.filled", "label": "半弹层", "value": "3 档" },
+          { "icon": "curlybraces", "label": "示例代码", "value": "JSON" }
+        ]
       },
-      "highlights": [
-        { "icon": "square.stack.3d.up.fill", "label": "组件", "value": "31 个" },
-        { "icon": "rectangle.bottomhalf.inset.filled", "label": "半弹层", "value": "3 档" },
-        { "icon": "curlybraces", "label": "示例代码", "value": "JSON" }
-      ]
-    },
+      {
+        "style": "dashboard",
+        "dashboard_title": "原生交互示例",
+        "badge_text": "3 档高度",
+        "action_title": "查看半弹层",
+        "background_colors": ["#0891B2", "#0F766E", "#0F172A"],
+        "overlay_opacity": 0.42,
+        "hero": {
+          "icon": "rectangle.bottomhalf.inset.filled",
+          "title": "原生半弹层",
+          "subtitle": "支持紧凑、中等和全屏高度，手势可自由切换"
+        },
+        "highlights": [
+          { "icon": "hand.draw.fill", "label": "交互", "value": "原生手势" },
+          { "icon": "arrow.up.and.down", "label": "高度", "value": "3 档" },
+          { "icon": "square.stack.3d.up", "label": "内容", "value": "动态渲染" }
+        ]
+      },
+      {
+        "style": "dashboard",
+        "dashboard_title": "数据组件示例",
+        "badge_text": "图表与表单",
+        "action_title": "浏览组件",
+        "background_colors": ["#2563EB", "#4F46E5", "#111827"],
+        "overlay_opacity": 0.42,
+        "hero": {
+          "icon": "chart.xyaxis.line",
+          "title": "图表、表格与表单",
+          "subtitle": "用统一 JSON 描述数据展示和交互操作"
+        },
+        "highlights": [
+          { "icon": "chart.line.uptrend.xyaxis", "label": "图表", "value": "5 种" },
+          { "icon": "tablecells", "label": "数据", "value": "表格" },
+          { "icon": "list.bullet.rectangle", "label": "输入", "value": "表单" }
+        ]
+      }
+    ],
     "latest_version": "1.0.28",
     "manifest_path": "plugins/myservers-demo-nas/1.0.28/manifest.json"
   }
