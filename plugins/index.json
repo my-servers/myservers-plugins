@@ -7,7 +7,7 @@
     "demo_cards": [
       {
         "style": "dashboard",
-        "description": "插件组件与代码示例",
+        "description": "仪表盘卡片",
         "dashboard_title": "插件开发示例",
         "badge_text": "31 个组件",
         "action_title": "查看示例",
@@ -25,8 +25,8 @@
         ]
       },
       {
-        "style": "dashboard",
-        "description": "原生半弹层交互示例",
+        "style": "marketing",
+        "description": "功能宣传卡片",
         "dashboard_title": "原生交互示例",
         "badge_text": "3 档高度",
         "action_title": "查看半弹层",
@@ -44,8 +44,8 @@
         ]
       },
       {
-        "style": "dashboard",
-        "description": "图表与表单组件示例",
+        "style": "metrics",
+        "description": "指标数据卡片",
         "dashboard_title": "数据组件示例",
         "badge_text": "图表与表单",
         "action_title": "浏览组件",
