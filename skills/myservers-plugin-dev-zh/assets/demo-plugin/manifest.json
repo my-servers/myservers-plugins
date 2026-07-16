@@ -1,0 +1,75 @@
+{
+  "id": "example-service-status",
+  "version": "1.0.0",
+  "name": "服务状态示例",
+  "description": "展示服务健康度、资源趋势和原生半弹层。",
+  "icon": "server.rack",
+  "demo_cards": [
+    {
+      "style": "components",
+      "description": "折线图 · 进度条 · 徽标",
+      "dashboard_title": "服务状态",
+      "badge_text": "实时",
+      "action_title": "查看示例",
+      "background_colors": ["#2563EB", "#4F46E5", "#111827"],
+      "overlay_opacity": 0.42,
+      "hero": {
+        "icon": "server.rack",
+        "title": "服务状态示例",
+        "subtitle": "安装后展示健康度、资源趋势和操作入口"
+      },
+      "highlights": [
+        { "icon": "chart.xyaxis.line", "label": "趋势", "value": "实时" },
+        { "icon": "rectangle.bottomhalf.inset.filled", "label": "详情", "value": "原生 Sheet" }
+      ],
+      "components": [
+        { "kind": "badge", "text": "运行正常", "accent": "green" },
+        {
+          "kind": "line",
+          "title": "CPU 使用率",
+          "icon": "cpu",
+          "accent": "blue",
+          "unit": "%",
+          "min": 0,
+          "max": 100,
+          "points": [
+            { "label": "10:00", "value": 28 },
+            { "label": "10:05", "value": 43 },
+            { "label": "10:10", "value": 35 },
+            { "label": "10:15", "value": 52 }
+          ]
+        },
+        {
+          "kind": "progress",
+          "title": "内存使用",
+          "subtitle": "8.9 GB / 16 GB",
+          "icon": "memorychip",
+          "accent": "purple",
+          "value": 0.56,
+          "progress": 0.56,
+          "unit": "%"
+        }
+      ]
+    }
+  ],
+  "min_server_version": "3.0.23",
+  "min_app_version": "3.20",
+  "permissions": [],
+  "config_schema": [
+    {
+      "key": "display_name",
+      "label": "显示名称",
+      "input": "text",
+      "required": false,
+      "default_value": "家庭服务器"
+    }
+  ],
+  "commands": [],
+  "entrypoints": { "main": "main.js" },
+  "assets": [{ "path": "main.js", "kind": "script" }],
+  "checksums": { "main.js": "sha256:312f6255297003069e0839857aa5d423d616fbc84a3a9cb07f127067fa5716d3" },
+  "widgets": [
+    { "id": "summary", "name": "服务摘要", "description": "展示服务健康度和 CPU 使用率。" }
+  ],
+  "background_tasks": []
+}
