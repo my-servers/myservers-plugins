@@ -1,0 +1,661 @@
+var CLOUDFLARE_API = "https://api.cloudflare.com/client/v4";
+var CLOUDFLARE_ICON_URL = "https://www.cloudflare.com/favicon.ico";
+var SNAPSHOT_CACHE_KEY = "cloudflare-overview-snapshot";
+var SNAPSHOT_FRESH_MS = 120000;
+
+var HTTP_ANALYTICS_QUERY = [
+  "query MyServersHTTPAnalytics($zoneTag: string!, $since: DateTime!, $until: DateTime!) {",
+  "  viewer {",
+  "    zones(filter: { zoneTag: $zoneTag }) {",
+  "      requests: httpRequestsAdaptiveGroups(",
+  "        limit: 1000",
+  "        filter: { datetime_geq: $since, datetime_leq: $until }",
+  "        orderBy: [datetimeHour_ASC]",
+  "      ) {",
+  "        count",
+  "        dimensions { datetimeHour }",
+  "        sum { edgeResponseBytes visits }",
+  "      }",
+  "      cache: httpRequestsAdaptiveGroups(",
+  "        limit: 1000",
+  "        filter: { datetime_geq: $since, datetime_leq: $until }",
+  "        orderBy: [datetimeHour_ASC]",
+  "      ) {",
+  "        count",
+  "        dimensions { datetimeHour cacheStatus }",
+  "        sum { edgeResponseBytes }",
+  "      }",
+  "    }",
+  "  }",
+  "}"
+].join("\n");
+
+function configValue(ctx, key) {
+  if (!ctx.config || ctx.config[key] === undefined || ctx.config[key] === null) return "";
+  return String(ctx.config[key]).trim();
+}
+
+function isEnabled(ctx, key, fallback) {
+  var value = configValue(ctx, key).toLowerCase();
+  if (value === "") return fallback;
+  return value === "true" || value === "1" || value === "yes" || value === "on";
+}
+
+function iconSource(systemName) {
+  return { systemName: systemName || "cloud.fill", url: CLOUDFLARE_ICON_URL };
+}
+
+function safeNumber(value) {
+  var number = Number(value);
+  return isFinite(number) ? number : 0;
+}
+
+function firstErrorMessage(payload, fallback) {
+  if (payload && payload.errors && payload.errors.length > 0) {
+    var item = payload.errors[0] || {};
+    if (item.message) return String(item.message);
+  }
+  return fallback;
+}
+
+function apiRequest(ctx, path, method, payload) {
+  if (!ctx.http || !ctx.http.request) throw new Error("插件尚未获得 Cloudflare HTTP 访问权限");
+  var token = configValue(ctx, "api_token");
+  if (!token) throw new Error("请先配置 Cloudflare API Token");
+
+  var options = {
+    url: CLOUDFLARE_API + path,
+    method: method || "GET",
+    headers: {
+      authorization: "Bearer " + token,
+      accept: "application/json"
+    },
+    body: ""
+  };
+  if (payload !== undefined && payload !== null) {
+    options.headers["content-type"] = "application/json";
+    options.body = JSON.stringify(payload);
+  }
+
+  var response = ctx.http.request(options);
+  var body = response.json;
+  if (response.status < 200 || response.status >= 300) {
+    throw new Error(firstErrorMessage(body, "Cloudflare API 返回 HTTP " + response.status));
+  }
+  if (!body) throw new Error("Cloudflare API 返回了无法解析的数据");
+  if (body.success === false) throw new Error(firstErrorMessage(body, "Cloudflare API 请求失败"));
+  return body;
+}
+
+function selectZone(zones, requestedName) {
+  var requested = String(requestedName || "").toLowerCase();
+  var index;
+  if (requested) {
+    for (index = 0; index < zones.length; index += 1) {
+      if (String(zones[index].name || "").toLowerCase() === requested) return zones[index];
+    }
+    throw new Error("没有找到域名 " + requestedName + "，请检查 Zone 名称和 Token 权限");
+  }
+  for (index = 0; index < zones.length; index += 1) {
+    if (zones[index].status === "active" && !zones[index].paused) return zones[index];
+  }
+  return zones[0];
+}
+
+function hourLabel(value) {
+  var text = String(value || "");
+  var match = text.match(/T(\d{2}):/);
+  return match ? match[1] + ":00" : text.slice(0, 10);
+}
+
+function cacheStatusIsHit(status) {
+  var normalized = String(status || "").toLowerCase();
+  return normalized === "hit" || normalized === "revalidated" || normalized === "updating" || normalized === "stale";
+}
+
+function queryAnalytics(ctx, zoneID) {
+  var until = new Date();
+  var since = new Date(until.getTime() - 24 * 60 * 60 * 1000);
+  var response = apiRequest(ctx, "/graphql", "POST", {
+    query: HTTP_ANALYTICS_QUERY,
+    variables: {
+      zoneTag: zoneID,
+      since: since.toISOString(),
+      until: until.toISOString()
+    }
+  });
+  if (response.errors && response.errors.length > 0) {
+    throw new Error(firstErrorMessage(response, "Cloudflare Analytics 查询失败"));
+  }
+
+  var zones = response.data && response.data.viewer && response.data.viewer.zones;
+  if (!zones || zones.length === 0) throw new Error("Analytics 没有返回当前 Zone 的数据");
+  var requestGroups = zones[0].requests || [];
+  var cacheGroups = zones[0].cache || [];
+  var result = {
+    requests: 0,
+    bytes: 0,
+    visits: 0,
+    cachedBytes: 0,
+    cacheHitRatio: 0,
+    points: []
+  };
+  var index;
+  for (index = 0; index < requestGroups.length; index += 1) {
+    var requestGroup = requestGroups[index] || {};
+    var requestSum = requestGroup.sum || {};
+    var count = safeNumber(requestGroup.count);
+    result.requests += count;
+    result.bytes += safeNumber(requestSum.edgeResponseBytes);
+    result.visits += safeNumber(requestSum.visits);
+    result.points.push({
+      label: hourLabel(requestGroup.dimensions && requestGroup.dimensions.datetimeHour),
+      value: count
+    });
+  }
+  for (index = 0; index < cacheGroups.length; index += 1) {
+    var cacheGroup = cacheGroups[index] || {};
+    if (cacheStatusIsHit(cacheGroup.dimensions && cacheGroup.dimensions.cacheStatus)) {
+      result.cachedBytes += safeNumber(cacheGroup.sum && cacheGroup.sum.edgeResponseBytes);
+    }
+  }
+  if (result.bytes > 0) result.cacheHitRatio = Math.max(0, Math.min(1, result.cachedBytes / result.bytes));
+  return result;
+}
+
+function summarizeDNS(records) {
+  var result = { total: records.length, proxied: 0, dnsOnly: 0, typeCounts: {}, records: [] };
+  for (var index = 0; index < records.length; index += 1) {
+    var record = records[index] || {};
+    if (record.proxied) result.proxied += 1;
+    else result.dnsOnly += 1;
+    var type = String(record.type || "其他");
+    result.typeCounts[type] = safeNumber(result.typeCounts[type]) + 1;
+    result.records.push({
+      id: String(record.id || index),
+      type: type,
+      name: String(record.name || "—"),
+      content: String(record.content || "—"),
+      proxied: !!record.proxied,
+      ttl: safeNumber(record.ttl)
+    });
+  }
+  return result;
+}
+
+function summarizeTunnels(tunnels) {
+  var result = { total: tunnels.length, healthy: 0, degraded: 0, down: 0, inactive: 0, items: [] };
+  for (var index = 0; index < tunnels.length; index += 1) {
+    var tunnel = tunnels[index] || {};
+    var status = String(tunnel.status || "inactive").toLowerCase();
+    if (status === "healthy") result.healthy += 1;
+    else if (status === "degraded") result.degraded += 1;
+    else if (status === "down") result.down += 1;
+    else result.inactive += 1;
+    result.items.push({
+      id: String(tunnel.id || index),
+      name: String(tunnel.name || "未命名 Tunnel"),
+      status: status,
+      configSource: String(tunnel.config_src || "—"),
+      type: String(tunnel.tun_type || "cfd_tunnel")
+    });
+  }
+  return result;
+}
+
+function loadSnapshot(ctx) {
+  var zonePayload = apiRequest(ctx, "/zones?per_page=50", "GET");
+  var zones = zonePayload.result || [];
+  if (zones.length === 0) throw new Error("当前 Token 没有可读取的 Cloudflare Zone");
+  var zone = selectZone(zones, configValue(ctx, "zone_name"));
+  var snapshot = {
+    fetchedAt: Date.now(),
+    zoneCount: zones.length,
+    zones: zones,
+    zone: zone,
+    dns: { total: 0, proxied: 0, dnsOnly: 0, typeCounts: {}, records: [] },
+    analytics: { requests: 0, bytes: 0, visits: 0, cachedBytes: 0, cacheHitRatio: 0, points: [] },
+    tunnels: { total: 0, healthy: 0, degraded: 0, down: 0, inactive: 0, items: [] },
+    warnings: []
+  };
+
+  try {
+    var dnsPayload = apiRequest(ctx, "/zones/" + encodeURIComponent(zone.id) + "/dns_records?per_page=100", "GET");
+    snapshot.dns = summarizeDNS(dnsPayload.result || []);
+  } catch (dnsError) {
+    snapshot.warnings.push("DNS：" + String(dnsError.message || dnsError));
+  }
+
+  try {
+    snapshot.analytics = queryAnalytics(ctx, zone.id);
+  } catch (analyticsError) {
+    snapshot.warnings.push("Analytics：" + String(analyticsError.message || analyticsError));
+  }
+
+  var accountID = configValue(ctx, "account_id") || (zone.account && zone.account.id) || "";
+  if (isEnabled(ctx, "show_tunnels", true) && accountID) {
+    try {
+      var tunnelPayload = apiRequest(ctx, "/accounts/" + encodeURIComponent(accountID) + "/cfd_tunnel?is_deleted=false&per_page=100", "GET");
+      snapshot.tunnels = summarizeTunnels(tunnelPayload.result || []);
+    } catch (tunnelError) {
+      snapshot.warnings.push("Tunnel：" + String(tunnelError.message || tunnelError));
+    }
+  }
+
+  if (ctx.cache) ctx.cache.set(SNAPSHOT_CACHE_KEY, snapshot, { ttlMs: 15 * 60 * 1000 });
+  return snapshot;
+}
+
+function cachedSnapshot(ctx) {
+  if (!ctx.cache) return null;
+  return ctx.cache.get(SNAPSHOT_CACHE_KEY);
+}
+
+function getSnapshot(ctx, force) {
+  var cached = cachedSnapshot(ctx);
+  if (!force && cached && safeNumber(cached.fetchedAt) > Date.now() - SNAPSHOT_FRESH_MS) return cached;
+  try {
+    return loadSnapshot(ctx);
+  } catch (error) {
+    if (cached) {
+      cached.warnings = (cached.warnings || []).concat(["刷新失败，正在展示缓存：" + String(error.message || error)]);
+      return cached;
+    }
+    return { error: String(error.message || error), warnings: [] };
+  }
+}
+
+function stateStatus(status) {
+  if (status === "active" || status === "healthy") return "PLUGIN_STATUS_HEALTHY";
+  if (status === "degraded" || status === "pending" || status === "initializing") return "PLUGIN_STATUS_WARNING";
+  if (status === "down" || status === "moved") return "PLUGIN_STATUS_ERROR";
+  return "PLUGIN_STATUS_STOPPED";
+}
+
+function stateAccent(status) {
+  if (status === "active" || status === "healthy") return "PLUGIN_ACCENT_GREEN";
+  if (status === "degraded" || status === "pending" || status === "initializing") return "PLUGIN_ACCENT_ORANGE";
+  if (status === "down" || status === "moved") return "PLUGIN_ACCENT_RED";
+  return "PLUGIN_ACCENT_GRAY";
+}
+
+function statusText(status) {
+  var values = {
+    active: "正常",
+    healthy: "健康",
+    degraded: "降级",
+    down: "离线",
+    inactive: "未连接",
+    pending: "等待接入",
+    initializing: "初始化中",
+    moved: "已迁移"
+  };
+  return values[status] || String(status || "未知");
+}
+
+function errorState(message) {
+  return {
+    id: "cloudflare-error",
+    stateBlock: {
+      kind: "PLUGIN_STATE_KIND_ERROR",
+      title: "无法读取 Cloudflare",
+      message: message,
+      actionTitle: "重试",
+      action: { plugin: { actionId: "refresh" } },
+      appearance: { accent: "PLUGIN_ACCENT_ORANGE", iconSource: iconSource("cloud.fill") }
+    }
+  };
+}
+
+function headerComponents(snapshot, prefix) {
+  var zone = snapshot.zone || {};
+  var accountName = zone.account && zone.account.name ? zone.account.name : "Cloudflare";
+  return [
+    {
+      id: prefix + "-header",
+      stack: {
+        axis: "PLUGIN_LAYOUT_AXIS_HORIZONTAL",
+        spacing: 10,
+        children: [
+          { id: prefix + "-icon", icon: { appearance: { accent: "PLUGIN_ACCENT_ORANGE", size: "PLUGIN_COMPONENT_SIZE_LARGE", iconSource: iconSource("cloud.fill") } } },
+          { id: prefix + "-title", text: { text: zone.name || "Cloudflare", style: "PLUGIN_TEXT_STYLE_TITLE" } },
+          { id: prefix + "-status", badge: { text: zone.paused ? "暂停" : statusText(zone.status), appearance: { accent: zone.paused ? "PLUGIN_ACCENT_ORANGE" : stateAccent(zone.status) } } }
+        ]
+      }
+    },
+    { id: prefix + "-subtitle", text: { text: accountName + " · 最近 24 小时", style: "PLUGIN_TEXT_STYLE_CAPTION", appearance: { accent: "PLUGIN_ACCENT_GRAY" } } }
+  ];
+}
+
+function overviewGrid(snapshot, prefix) {
+  var tunnels = snapshot.tunnels || {};
+  return {
+    id: prefix + "-overview-grid",
+    grid: {
+      columns: 2,
+      spacing: 10,
+      appearance: { container: "PLUGIN_CONTAINER_STYLE_NONE" },
+      children: [
+        {
+          id: prefix + "-requests",
+          value: {
+            title: "请求",
+            subtitle: "最近 24 小时",
+            value: { number: safeNumber(snapshot.analytics && snapshot.analytics.requests), format: "PLUGIN_VALUE_FORMAT_NUMBER", status: "PLUGIN_STATUS_RUNNING" },
+            appearance: { accent: "PLUGIN_ACCENT_ORANGE", iconSource: { systemName: "arrow.up.arrow.down.circle.fill" }, variant: "PLUGIN_COMPONENT_VARIANT_TINTED" },
+            onTap: { navigate: { surface: "detail", route: "analytics" } }
+          }
+        },
+        {
+          id: prefix + "-bandwidth",
+          value: {
+            title: "流量",
+            subtitle: "Edge Response",
+            value: { number: safeNumber(snapshot.analytics && snapshot.analytics.bytes), format: "PLUGIN_VALUE_FORMAT_BYTES" },
+            appearance: { accent: "PLUGIN_ACCENT_BLUE", iconSource: { systemName: "network" }, variant: "PLUGIN_COMPONENT_VARIANT_TINTED" },
+            onTap: { navigate: { surface: "detail", route: "analytics" } }
+          }
+        },
+        {
+          id: prefix + "-dns",
+          value: {
+            title: "DNS 记录",
+            subtitle: safeNumber(snapshot.dns && snapshot.dns.proxied) + " 条已代理",
+            value: { number: safeNumber(snapshot.dns && snapshot.dns.total), format: "PLUGIN_VALUE_FORMAT_NUMBER" },
+            appearance: { accent: "PLUGIN_ACCENT_INDIGO", iconSource: { systemName: "globe" }, variant: "PLUGIN_COMPONENT_VARIANT_TINTED" },
+            onTap: { navigate: { surface: "detail", route: "dns" } }
+          }
+        },
+        {
+          id: prefix + "-tunnels",
+          value: {
+            title: "Tunnel",
+            subtitle: safeNumber(tunnels.healthy) + " 个健康",
+            value: { number: safeNumber(tunnels.total), format: "PLUGIN_VALUE_FORMAT_NUMBER", status: safeNumber(tunnels.down) > 0 ? "PLUGIN_STATUS_ERROR" : "PLUGIN_STATUS_HEALTHY" },
+            appearance: { accent: safeNumber(tunnels.down) > 0 ? "PLUGIN_ACCENT_RED" : "PLUGIN_ACCENT_TEAL", iconSource: { systemName: "point.3.connected.trianglepath.dotted" }, variant: "PLUGIN_COMPONENT_VARIANT_TINTED" },
+            onTap: { navigate: { surface: "detail", route: "tunnels" } }
+          }
+        }
+      ]
+    }
+  };
+}
+
+function dashboardSummaryGrid(snapshot, prefix) {
+  var tunnels = snapshot.tunnels || {};
+  var tunnelText = safeNumber(tunnels.healthy) + "/" + safeNumber(tunnels.total);
+  return {
+    id: prefix + "-summary-grid",
+    grid: {
+      columns: 2,
+      spacing: 10,
+      appearance: { container: "PLUGIN_CONTAINER_STYLE_NONE" },
+      children: [
+        {
+          id: prefix + "-summary-requests",
+          value: {
+            title: "请求",
+            value: { number: safeNumber(snapshot.analytics && snapshot.analytics.requests), format: "PLUGIN_VALUE_FORMAT_NUMBER", status: "PLUGIN_STATUS_RUNNING" },
+            appearance: { accent: "PLUGIN_ACCENT_ORANGE", iconSource: { systemName: "arrow.up.arrow.down.circle.fill" }, variant: "PLUGIN_COMPONENT_VARIANT_TINTED" },
+            onTap: { navigate: { surface: "detail", route: "analytics" } }
+          }
+        },
+        {
+          id: prefix + "-summary-bandwidth",
+          value: {
+            title: "流量",
+            value: { number: safeNumber(snapshot.analytics && snapshot.analytics.bytes), format: "PLUGIN_VALUE_FORMAT_BYTES" },
+            appearance: { accent: "PLUGIN_ACCENT_BLUE", iconSource: { systemName: "network" }, variant: "PLUGIN_COMPONENT_VARIANT_TINTED" },
+            onTap: { navigate: { surface: "detail", route: "analytics" } }
+          }
+        },
+        {
+          id: prefix + "-summary-dns",
+          value: {
+            title: "DNS",
+            value: { number: safeNumber(snapshot.dns && snapshot.dns.total), format: "PLUGIN_VALUE_FORMAT_NUMBER" },
+            appearance: { accent: "PLUGIN_ACCENT_INDIGO", iconSource: { systemName: "globe" }, variant: "PLUGIN_COMPONENT_VARIANT_TINTED" },
+            onTap: { navigate: { surface: "detail", route: "dns" } }
+          }
+        },
+        {
+          id: prefix + "-summary-tunnels",
+          value: {
+            title: "Tunnel",
+            value: { text: tunnelText, status: safeNumber(tunnels.down) > 0 ? "PLUGIN_STATUS_ERROR" : "PLUGIN_STATUS_HEALTHY" },
+            appearance: { accent: safeNumber(tunnels.down) > 0 ? "PLUGIN_ACCENT_RED" : "PLUGIN_ACCENT_TEAL", iconSource: { systemName: "point.3.connected.trianglepath.dotted" }, variant: "PLUGIN_COMPONENT_VARIANT_TINTED" },
+            onTap: { navigate: { surface: "detail", route: "tunnels" } }
+          }
+        }
+      ]
+    }
+  };
+}
+
+function analyticsComponents(snapshot, prefix) {
+  var analytics = snapshot.analytics || {};
+  var points = analytics.points || [];
+  var result = [];
+  if (points.length > 0) {
+    result.push({
+      id: prefix + "-request-chart",
+      chart: {
+        title: "请求趋势",
+        kind: "PLUGIN_CHART_KIND_AREA",
+        points: points,
+        options: { min: 0, showLabels: true, hideRange: true, emptyText: "暂无 Analytics 数据" },
+        appearance: { accent: "PLUGIN_ACCENT_ORANGE" }
+      }
+    });
+  } else {
+    result.push({
+      id: prefix + "-analytics-empty",
+      stateBlock: {
+        kind: "PLUGIN_STATE_KIND_EMPTY",
+        title: "暂无流量数据",
+        message: "请确认 Token 包含 Analytics Read 权限，且当前域名已有代理流量。",
+        appearance: { accent: "PLUGIN_ACCENT_ORANGE", iconSource: { systemName: "chart.xyaxis.line" } }
+      }
+    });
+  }
+  var cacheRatio = Math.max(0, Math.min(1, safeNumber(analytics.cacheHitRatio)));
+  result.push({
+    id: prefix + "-cache-gauge",
+    segmentedGauge: {
+      title: "缓存流量占比",
+      segments: [
+        { label: "缓存命中", value: cacheRatio * 100, appearance: { accent: "PLUGIN_ACCENT_ORANGE" } },
+        { label: "回源流量", value: (1 - cacheRatio) * 100, appearance: { accent: "PLUGIN_ACCENT_GRAY" } }
+      ],
+      centerValue: { number: cacheRatio, format: "PLUGIN_VALUE_FORMAT_PERCENT" },
+      showLegend: true,
+      appearance: { accent: "PLUGIN_ACCENT_ORANGE" }
+    }
+  });
+  return result;
+}
+
+function dnsList(snapshot, limit, prefix) {
+  var records = (snapshot.dns && snapshot.dns.records) || [];
+  var items = [];
+  for (var index = 0; index < records.length && index < limit; index += 1) {
+    var record = records[index];
+    items.push({
+      title: record.name,
+      subtitle: record.type + " · " + record.content,
+      value: { text: record.proxied ? "已代理" : "仅 DNS", status: record.proxied ? "PLUGIN_STATUS_RUNNING" : "PLUGIN_STATUS_NEUTRAL" },
+      appearance: { accent: record.proxied ? "PLUGIN_ACCENT_ORANGE" : "PLUGIN_ACCENT_GRAY", iconSource: { systemName: record.proxied ? "cloud.fill" : "network" } }
+    });
+  }
+  if (items.length === 0) {
+    return { id: prefix + "-dns-empty", stateBlock: { kind: "PLUGIN_STATE_KIND_EMPTY", title: "暂无 DNS 记录", message: "当前 Zone 没有可展示的记录，或 Token 未授权 DNS Read。", appearance: { accent: "PLUGIN_ACCENT_INDIGO", iconSource: { systemName: "globe" } } } };
+  }
+  return { id: prefix + "-dns-list", list: { title: "DNS 记录", items: items, appearance: { accent: "PLUGIN_ACCENT_INDIGO", variant: "PLUGIN_COMPONENT_VARIANT_TINTED" } } };
+}
+
+function tunnelList(snapshot, limit, prefix) {
+  var tunnels = (snapshot.tunnels && snapshot.tunnels.items) || [];
+  var items = [];
+  for (var index = 0; index < tunnels.length && index < limit; index += 1) {
+    var tunnel = tunnels[index];
+    items.push({
+      title: tunnel.name,
+      subtitle: tunnel.type + " · " + tunnel.configSource,
+      value: { text: statusText(tunnel.status), status: stateStatus(tunnel.status) },
+      appearance: { accent: stateAccent(tunnel.status), iconSource: { systemName: "point.3.connected.trianglepath.dotted" } }
+    });
+  }
+  if (items.length === 0) {
+    return { id: prefix + "-tunnel-empty", stateBlock: { kind: "PLUGIN_STATE_KIND_EMPTY", title: "暂无 Tunnel", message: "没有发现 Cloudflare Tunnel，或 Token 未授权 Tunnel Read。", appearance: { accent: "PLUGIN_ACCENT_TEAL", iconSource: { systemName: "point.3.connected.trianglepath.dotted" } } } };
+  }
+  return { id: prefix + "-tunnel-list", list: { title: "Cloudflare Tunnel", items: items, appearance: { accent: "PLUGIN_ACCENT_TEAL", variant: "PLUGIN_COMPONENT_VARIANT_TINTED" } } };
+}
+
+function warningComponent(snapshot, prefix) {
+  var warnings = snapshot.warnings || [];
+  if (warnings.length === 0) return null;
+  var children = [];
+  for (var index = 0; index < warnings.length; index += 1) {
+    children.push({ id: prefix + "-warning-" + index, text: { text: warnings[index], style: "PLUGIN_TEXT_STYLE_CAPTION", appearance: { accent: "PLUGIN_ACCENT_ORANGE" } } });
+  }
+  return {
+    id: prefix + "-warnings",
+    disclosure: {
+      title: "部分数据不可用",
+      subtitle: "插件会继续展示已获授权的数据",
+      expanded: false,
+      children: children,
+      appearance: { accent: "PLUGIN_ACCENT_ORANGE", variant: "PLUGIN_COMPONENT_VARIANT_TINTED" }
+    }
+  };
+}
+
+function dashboardComponents(ctx, snapshot, prefix) {
+  var components = [headerComponents(snapshot, prefix)[0]];
+  components.push(dashboardSummaryGrid(snapshot, prefix));
+  components.push({
+    id: prefix + "-open-detail",
+    button: {
+      title: "查看详情",
+      appearance: {
+        accent: "PLUGIN_ACCENT_ORANGE",
+        iconSource: { systemName: "arrow.right.circle.fill" },
+        variant: "PLUGIN_COMPONENT_VARIANT_FILLED"
+      },
+      onTap: { navigate: { surface: "detail", route: "overview" } }
+    }
+  });
+  return components;
+}
+
+function detailOverviewComponents(ctx, snapshot) {
+  var components = headerComponents(snapshot, "detail");
+  components.push(overviewGrid(snapshot, "detail"));
+  var analytics = analyticsComponents(snapshot, "detail");
+  for (var index = 0; index < analytics.length; index += 1) components.push(analytics[index]);
+  components.push(dnsList(snapshot, 20, "detail"));
+  if (isEnabled(ctx, "show_tunnels", true)) components.push(tunnelList(snapshot, 20, "detail"));
+  if ((snapshot.zones || []).length > 1) components.push(zoneList(snapshot));
+  var warning = warningComponent(snapshot, "detail");
+  if (warning) components.push(warning);
+  return components;
+}
+
+function zoneList(snapshot) {
+  var zones = snapshot.zones || [];
+  var items = [];
+  for (var index = 0; index < zones.length; index += 1) {
+    var zone = zones[index] || {};
+    items.push({
+      title: zone.name || "未命名 Zone",
+      subtitle: zone.account && zone.account.name ? zone.account.name : "Cloudflare",
+      value: { text: zone.paused ? "已暂停" : statusText(zone.status), status: zone.paused ? "PLUGIN_STATUS_WARNING" : stateStatus(zone.status) },
+      appearance: { accent: zone.paused ? "PLUGIN_ACCENT_ORANGE" : stateAccent(zone.status), iconSource: { systemName: "globe.asia.australia.fill" } }
+    });
+  }
+  return { id: "detail-zone-list", list: { title: "全部域名", items: items, appearance: { accent: "PLUGIN_ACCENT_ORANGE", variant: "PLUGIN_COMPONENT_VARIANT_TINTED" } } };
+}
+
+globalThis.dashboard = function(ctx) {
+  var snapshot = getSnapshot(ctx, false);
+  if (snapshot.error) return { title: "", components: [errorState(snapshot.error)] };
+  return { title: "", components: dashboardComponents(ctx, snapshot, "dashboard") };
+};
+
+globalThis.detail = function(ctx) {
+  var snapshot = getSnapshot(ctx, false);
+  if (snapshot.error) return { title: "Cloudflare", components: [errorState(snapshot.error)] };
+  var route = ctx.route || "overview";
+  var components = headerComponents(snapshot, "detail");
+  if (route === "analytics") {
+    components = components.concat(analyticsComponents(snapshot, "detail"));
+    components.push({ id: "detail-analytics-values", descriptionList: { title: "流量摘要", columns: 2, items: [
+      { title: "请求", value: { number: safeNumber(snapshot.analytics.requests), format: "PLUGIN_VALUE_FORMAT_NUMBER" } },
+      { title: "访客", value: { number: safeNumber(snapshot.analytics.visits), format: "PLUGIN_VALUE_FORMAT_NUMBER" } },
+      { title: "总流量", value: { number: safeNumber(snapshot.analytics.bytes), format: "PLUGIN_VALUE_FORMAT_BYTES" } },
+      { title: "缓存流量", value: { number: safeNumber(snapshot.analytics.cachedBytes), format: "PLUGIN_VALUE_FORMAT_BYTES" } }
+    ], appearance: { accent: "PLUGIN_ACCENT_ORANGE" } } });
+    return { title: "流量分析", components: components };
+  }
+  if (route === "dns") {
+    components.push(dnsList(snapshot, 30, "detail"));
+    return { title: "DNS 记录", components: components };
+  }
+  if (route === "tunnels") {
+    components.push(tunnelList(snapshot, 30, "detail"));
+    return { title: "Cloudflare Tunnel", components: components };
+  }
+  return { title: snapshot.zone.name || "Cloudflare", components: detailOverviewComponents(ctx, snapshot) };
+};
+
+globalThis.widget = function(ctx) {
+  var snapshot = getSnapshot(ctx, false);
+  if (snapshot.error) return { title: "Cloudflare", components: [errorState(snapshot.error)] };
+  var size = ctx.widgetSize || "unspecified";
+  var children = headerComponents(snapshot, "widget");
+  children.push({
+    id: "widget-primary",
+    value: {
+      title: "最近 24 小时请求",
+      value: { number: safeNumber(snapshot.analytics.requests), format: "PLUGIN_VALUE_FORMAT_NUMBER", status: "PLUGIN_STATUS_RUNNING" },
+      appearance: { accent: "PLUGIN_ACCENT_ORANGE", iconSource: { systemName: "arrow.up.arrow.down.circle.fill" }, hideBackground: true }
+    }
+  });
+  if (size === "medium" || size === "large" || size === "unspecified") {
+    var points = snapshot.analytics.points || [];
+    if (points.length > 0) children.push({ id: "widget-chart", chart: { title: "请求趋势", kind: "PLUGIN_CHART_KIND_LINE", points: points, options: { min: 0, showLabels: false, hideRange: true }, appearance: { accent: "PLUGIN_ACCENT_ORANGE", hideBackground: true } } });
+  }
+  if (size === "large") {
+    children.push(overviewGrid(snapshot, "widget-large"));
+    if (safeNumber(snapshot.tunnels.total) > 0) children.push(tunnelList(snapshot, 3, "widget"));
+  }
+  return {
+    title: "Cloudflare 概览",
+    components: [{ id: "widget-card", card: { appearance: { accent: "PLUGIN_ACCENT_ORANGE", variant: "PLUGIN_COMPONENT_VARIANT_TINTED" }, onTap: { navigate: { surface: "detail", route: "overview" } }, children: children } }]
+  };
+};
+
+globalThis.background = function(ctx) {
+  if (ctx.taskId === "refresh-cloudflare") {
+    try {
+      loadSnapshot(ctx);
+    } catch (error) {
+      if (ctx.log && ctx.log.error) ctx.log.error("Cloudflare refresh failed: " + String(error.message || error));
+    }
+  }
+  return {};
+};
+
+globalThis.actions = {
+  refresh: function(ctx) {
+    try {
+      loadSnapshot(ctx);
+      return { effects: [
+        { toast: { text: "Cloudflare 数据已刷新", level: "success", durationMs: 1600 } },
+        { refresh: { surface: "current" } }
+      ] };
+    } catch (error) {
+      return { effects: [{ toast: { text: String(error.message || error), level: "error", durationMs: 2600 } }] };
+    }
+  }
+};
