@@ -109,5 +109,142 @@
     ],
     "latest_version": "1.0.30",
     "manifest_path": "plugins/myservers-demo-nas/1.0.30/manifest.json"
+  },
+  {
+    "id": "cloudflare-overview",
+    "name": "Cloudflare 概览",
+    "description": "集中查看 Cloudflare 域名、流量、DNS 与 Tunnel 状态。",
+    "icon": "cloud.fill",
+    "icon_url": "https://www.cloudflare.com/favicon.ico",
+    "demo_cards": [
+      {
+        "style": "components",
+        "description": "流量趋势",
+        "dashboard_title": "Cloudflare 流量",
+        "badge_text": "最近 24 小时",
+        "action_title": "查看概览",
+        "background_colors": ["#F6821F", "#FBBF24", "#111827"],
+        "overlay_opacity": 0.5,
+        "hero": {
+          "icon": "cloud.fill",
+          "title": "域名流量概览",
+          "subtitle": "请求、流量与缓存命中情况"
+        },
+        "highlights": [
+          { "icon": "arrow.up.arrow.down.circle.fill", "label": "请求", "value": "128K" },
+          { "icon": "externaldrive.fill.badge.checkmark", "label": "缓存", "value": "72%" }
+        ],
+        "components": [
+          { "kind": "badge", "text": "Zone 正常", "accent": "green" },
+          {
+            "kind": "area",
+            "title": "请求趋势",
+            "icon": "chart.xyaxis.line",
+            "accent": "orange",
+            "min": 0,
+            "max": 24000,
+            "points": [
+              { "label": "00:00", "value": 8200 },
+              { "label": "04:00", "value": 6400 },
+              { "label": "08:00", "value": 12600 },
+              { "label": "12:00", "value": 18400 },
+              { "label": "16:00", "value": 21800 },
+              { "label": "20:00", "value": 16600 },
+              { "label": "24:00", "value": 14200 }
+            ]
+          },
+          {
+            "kind": "donut",
+            "title": "缓存流量",
+            "icon": "externaldrive.fill.badge.checkmark",
+            "accent": "orange",
+            "unit": "%",
+            "points": [
+              { "label": "缓存命中", "value": 72 },
+              { "label": "回源流量", "value": 28 }
+            ]
+          }
+        ]
+      },
+      {
+        "style": "components",
+        "description": "DNS 状态",
+        "dashboard_title": "DNS 与代理",
+        "badge_text": "example.com",
+        "action_title": "查看 DNS",
+        "background_colors": ["#EA580C", "#7C2D12", "#111827"],
+        "overlay_opacity": 0.5,
+        "hero": {
+          "icon": "globe",
+          "title": "DNS 记录概览",
+          "subtitle": "快速确认代理状态和记录数量"
+        },
+        "highlights": [
+          { "icon": "cloud.fill", "label": "已代理", "value": "18" },
+          { "icon": "network", "label": "仅 DNS", "value": "6" }
+        ],
+        "components": [
+          { "kind": "badge", "text": "DNS 正常", "accent": "green" },
+          {
+            "kind": "value",
+            "title": "DNS 记录",
+            "subtitle": "A · AAAA · CNAME · MX",
+            "icon": "globe",
+            "accent": "indigo",
+            "value": 24
+          },
+          {
+            "kind": "donut",
+            "title": "代理状态",
+            "icon": "cloud.fill",
+            "accent": "orange",
+            "points": [
+              { "label": "已代理", "value": 18 },
+              { "label": "仅 DNS", "value": 6 }
+            ]
+          }
+        ]
+      },
+      {
+        "style": "components",
+        "description": "Tunnel 健康度",
+        "dashboard_title": "Cloudflare Tunnel",
+        "badge_text": "远程访问",
+        "action_title": "查看连接",
+        "background_colors": ["#0F766E", "#115E59", "#111827"],
+        "overlay_opacity": 0.5,
+        "hero": {
+          "icon": "point.3.connected.trianglepath.dotted",
+          "title": "Tunnel 连接状态",
+          "subtitle": "查看 NAS 与 Cloudflare Edge 的连接健康度"
+        },
+        "highlights": [
+          { "icon": "checkmark.circle.fill", "label": "健康", "value": "3" },
+          { "icon": "exclamationmark.triangle.fill", "label": "异常", "value": "0" }
+        ],
+        "components": [
+          { "kind": "badge", "text": "全部在线", "accent": "green" },
+          {
+            "kind": "gauge",
+            "title": "Tunnel 健康度",
+            "icon": "point.3.connected.trianglepath.dotted",
+            "accent": "teal",
+            "min": 0,
+            "max": 100,
+            "points": [{ "label": "健康", "value": 100 }]
+          },
+          {
+            "kind": "value",
+            "title": "在线连接",
+            "subtitle": "3 个 Tunnel",
+            "icon": "link.circle.fill",
+            "accent": "green",
+            "value": 3
+          }
+        ]
+      }
+    ],
+    "latest_version": "1.0.0",
+    "manifest_path": "plugins/cloudflare-overview/1.0.0/manifest.json"
   }
 ]
