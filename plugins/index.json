@@ -247,5 +247,38 @@
     ],
     "latest_version": "1.0.20",
     "manifest_path": "plugins/cloudflare-overview/1.0.20/manifest.json"
+  },
+  {
+    "id": "openwrt-monitor",
+    "name": "OpenWrt 管理",
+    "description": "通过标准 ubus 查看 OpenWrt 系统、网络、流量、客户端和无线状态。",
+    "icon": "wifi.router.fill",
+    "demo_cards": [
+      {
+        "style": "components",
+        "description": "系统与网络概览",
+        "dashboard_title": "OpenWrt 概览",
+        "badge_text": "路由器在线",
+        "action_title": "查看状态",
+        "background_colors": ["#2563EB", "#0F766E", "#0F172A"],
+        "overlay_opacity": 0.48,
+        "hero": {
+          "icon": "wifi.router.fill",
+          "title": "家庭网络一屏掌握",
+          "subtitle": "固件、负载、内存与 WAN 状态"
+        },
+        "highlights": [
+          { "icon": "network", "label": "WAN", "value": "在线" },
+          { "icon": "clock.arrow.circlepath", "label": "运行", "value": "12 天" }
+        ],
+        "components": [
+          { "kind": "badge", "text": "运行正常", "accent": "green" },
+          { "kind": "progress", "title": "内存使用", "subtitle": "256 MB / 512 MB", "icon": "memorychip", "accent": "purple", "value": 0.5, "progress": 0.5, "unit": "%" },
+          { "kind": "value", "title": "系统负载", "subtitle": "最近 1 分钟", "icon": "speedometer", "accent": "blue", "value": 0.42 }
+        ]
+      }
+    ],
+    "latest_version": "1.0.0",
+    "manifest_path": "plugins/openwrt-monitor/1.0.0/manifest.json"
   }
 ]
