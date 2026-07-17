@@ -108,8 +108,8 @@
         ]
       }
     ],
-    "latest_version": "1.0.32",
-    "manifest_path": "plugins/myservers-demo-nas/1.0.32/manifest.json"
+    "latest_version": "1.0.33",
+    "manifest_path": "plugins/myservers-demo-nas/1.0.33/manifest.json"
   },
   {
     "id": "cloudflare-overview",
