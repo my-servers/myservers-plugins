@@ -244,7 +244,7 @@
         ]
       }
     ],
-    "latest_version": "1.0.18",
-    "manifest_path": "plugins/cloudflare-overview/1.0.18/manifest.json"
+    "latest_version": "1.0.19",
+    "manifest_path": "plugins/cloudflare-overview/1.0.19/manifest.json"
   }
 ]
