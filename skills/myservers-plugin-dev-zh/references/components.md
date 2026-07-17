@@ -4,7 +4,7 @@
 
 - JSON 规则
 - 通用值与外观
-- 24 类组件
+- 25 类组件
 - 图表与状态变体
 - 原生半弹层
 - Action 与 Effects
@@ -23,7 +23,7 @@ return {
 };
 ```
 
-每个 `PluginComponent` 只能设置一种内容字段：`stack`、`grid`、`card`、`text`、`value`、`badge`、`button`、`list`、`progress`、`chart`、`icon`、`image`、`divider`、`spacer`、`table`、`descriptionList`、`form`、`actionMenu`、`confirm`、`tabs`、`disclosure`、`stateBlock`、`codeBlock` 或 `segmentedGauge`。
+每个 `PluginComponent` 只能设置一种内容字段：`stack`、`grid`、`card`、`text`、`value`、`badge`、`button`、`toggle`、`list`、`progress`、`chart`、`icon`、`image`、`divider`、`spacer`、`table`、`descriptionList`、`form`、`actionMenu`、`confirm`、`tabs`、`disclosure`、`stateBlock`、`codeBlock` 或 `segmentedGauge`。
 
 字段用 protobuf JSON 的 lowerCamelCase：`onTap`、`iconSource`、`descriptionList`、`stateBlock`、`codeBlock`、`segmentedGauge`。
 
@@ -71,7 +71,7 @@ appearance: {
 - `url` 优先于 `systemName`；仅接受 HTTP/HTTPS；失败回退 SF Symbol。
 - `appearance.icon`、`icon.name/url`、`stateBlock.iconUrl` 只是旧插件兼容字段，新代码不要使用。
 
-## 24 类组件
+## 25 类组件
 
 | JSON 字段 | 能力与关键字段 |
 |---|---|
@@ -82,6 +82,7 @@ appearance: {
 | `value` | 标题、说明、格式化值、趋势和状态；可点击。`title`、`subtitle`、`value`、`appearance`、`onTap`。 |
 | `badge` | 短状态或短值；可点击。`text`、`value`、`appearance`、`onTap`。 |
 | `button` | 普通插件 Action 或导航。`title`、`subtitle`、`appearance`、`onTap`。 |
+| `toggle` | 原生开关。`title`、`subtitle`、`isOn`、`appearance`、`onChange`、`disabled`；切换后的布尔值通过 Action 参数 `value` 传递。 |
 | `list` | 多行列表；列表和单行都可点击。每项有 `title`、`subtitle`、`value`、`appearance`、`onTap`。 |
 | `progress` | 0...1 线性进度、格式化值、说明；可点击。 |
 | `chart` | 折线、柱状、面积、环形、仪表图；支持范围、标签、空文案、隐藏范围；可点击。 |
@@ -103,6 +104,28 @@ appearance: {
 ### 文本样式
 
 `PLUGIN_TEXT_STYLE_TITLE`、`SUBTITLE`、`BODY`、`CAPTION`、`VALUE`。
+
+### 开关
+
+```javascript
+{
+  id: "alerts",
+  toggle: {
+    title: "异常通知",
+    subtitle: "服务异常时发送通知",
+    isOn: true,
+    appearance: {
+      accent: "PLUGIN_ACCENT_GREEN",
+      iconSource: { systemName: "bell.badge.fill" }
+    },
+    onChange: {
+      plugin: { actionId: "setAlerts", params: { scope: "server" } }
+    }
+  }
+}
+```
+
+用户切换后，App 保留原有 `params`，并写入 `ctx.params.value`，值为字符串 `"true"` 或 `"false"`。没有 `onChange` 或 `disabled: true` 时，开关按只读状态展示。
 
 ### 图表
 

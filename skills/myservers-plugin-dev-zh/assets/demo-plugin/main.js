@@ -119,6 +119,19 @@ globalThis.detail = function (ctx) {
             }
           }
         }
+      },
+      {
+        id: "alerts",
+        toggle: {
+          title: "异常通知",
+          subtitle: "服务异常时发送通知",
+          isOn: true,
+          appearance: {
+            accent: "PLUGIN_ACCENT_GREEN",
+            iconSource: { systemName: "bell.badge.fill" }
+          },
+          onChange: { plugin: { actionId: "setAlerts" } }
+        }
       }
     ]
   };
@@ -157,6 +170,13 @@ globalThis.widget = function (ctx) {
 };
 
 globalThis.actions = {
+  setAlerts: function (ctx) {
+    return {
+      effects: [
+        { toast: { text: ctx.params.value === "true" ? "通知已开启" : "通知已关闭", level: "success" } }
+      ]
+    };
+  },
   refresh: function () {
     return {
       effects: [

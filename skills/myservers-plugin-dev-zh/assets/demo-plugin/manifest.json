@@ -52,7 +52,7 @@
       ]
     }
   ],
-  "min_server_version": "3.0.23",
+  "min_server_version": "3.0.24",
   "min_app_version": "3.20",
   "permissions": [],
   "config_schema": [
@@ -67,7 +67,7 @@
   "commands": [],
   "entrypoints": { "main": "main.js" },
   "assets": [{ "path": "main.js", "kind": "script" }],
-  "checksums": { "main.js": "sha256:312f6255297003069e0839857aa5d423d616fbc84a3a9cb07f127067fa5716d3" },
+  "checksums": { "main.js": "sha256:a3eedf93a1b4cc535b2d1c0bbac0f0b4e95daf8caf8f3d08473c7ec7d7cd3f40" },
   "widgets": [
     { "id": "summary", "name": "服务摘要", "description": "展示服务健康度和 CPU 使用率。" }
   ],
