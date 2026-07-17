@@ -10,7 +10,7 @@
         "style": "components",
         "description": "折线图 · 进度条 · 徽标",
         "dashboard_title": "插件开发示例",
-        "badge_text": "33 个组件",
+        "badge_text": "34 个组件",
         "action_title": "查看示例",
         "components": [
           { "kind": "badge", "text": "实时", "accent": "green" },
@@ -37,7 +37,7 @@
           "subtitle": "查看插件组件、原生半弹层和示例代码"
         },
         "highlights": [
-          { "icon": "square.stack.3d.up.fill", "label": "组件", "value": "33 个" },
+          { "icon": "square.stack.3d.up.fill", "label": "组件", "value": "34 个" },
           { "icon": "rectangle.bottomhalf.inset.filled", "label": "半弹层", "value": "3 档" },
           { "icon": "curlybraces", "label": "示例代码", "value": "JSON" }
         ]
@@ -108,8 +108,8 @@
         ]
       }
     ],
-    "latest_version": "1.0.34",
-    "manifest_path": "plugins/myservers-demo-nas/1.0.34/manifest.json"
+    "latest_version": "1.0.35",
+    "manifest_path": "plugins/myservers-demo-nas/1.0.35/manifest.json"
   },
   {
     "id": "cloudflare-overview",
