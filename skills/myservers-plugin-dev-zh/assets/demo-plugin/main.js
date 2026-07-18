@@ -45,7 +45,7 @@ function statusCard(ctx, compact) {
     },
     {
       id: "memory",
-      progress: {
+      circularProgress: {
         title: "内存",
         subtitle: "8.9 GB / 16 GB",
         progress: 0.56,

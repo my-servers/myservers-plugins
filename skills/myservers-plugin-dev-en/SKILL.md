@@ -29,11 +29,13 @@ The schema examples are JSON/JavaScript and can be used unchanged regardless of 
 
 ## Supported presentation model
 
-There are 25 component content types:
+There are 26 component content types:
 
-`stack`, `grid`, `card`, `text`, `value`, `badge`, `button`, `toggle`, `list`, `progress`, `chart`, `segmentedGauge`, `table`, `descriptionList`, `form`, `actionMenu`, `confirm`, `tabs`, `disclosure`, `stateBlock`, `codeBlock`, `icon`, `image`, `divider`, and `spacer`.
+`stack`, `grid`, `card`, `text`, `value`, `badge`, `button`, `toggle`, `list`, `progress`, `circularProgress`, `chart`, `segmentedGauge`, `table`, `descriptionList`, `form`, `actionMenu`, `confirm`, `tabs`, `disclosure`, `stateBlock`, `codeBlock`, `icon`, `image`, `divider`, and `spacer`.
 
 A `toggle` renders a native switch with `title`, `subtitle`, `isOn`, `appearance`, `onChange`, and `disabled`. On change, the app preserves declared action params and adds the target state as `ctx.params.value`, using the string `"true"` or `"false"`.
+
+A `circularProgress` renders a 0...1 ring with a centered formatted `value`, `title`, `subtitle`, `appearance`, and optional `onTap`. When `value` is omitted, the center automatically shows the progress percentage. It requires server 3.0.26 or later.
 
 Charts have line, bar, area, donut, and gauge variants. State blocks have empty, loading, error, permission, and unsupported variants. A bottom sheet is not a component: navigate to the native `sheet` surface with compact, medium, and/or large detents and return its content from `globalThis.sheet(ctx)`.
 

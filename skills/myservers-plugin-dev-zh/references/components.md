@@ -4,7 +4,7 @@
 
 - JSON 规则
 - 通用值与外观
-- 25 类组件
+- 26 类组件
 - 图表与状态变体
 - 原生半弹层
 - Action 与 Effects
@@ -23,9 +23,9 @@ return {
 };
 ```
 
-每个 `PluginComponent` 只能设置一种内容字段：`stack`、`grid`、`card`、`text`、`value`、`badge`、`button`、`toggle`、`list`、`progress`、`chart`、`icon`、`image`、`divider`、`spacer`、`table`、`descriptionList`、`form`、`actionMenu`、`confirm`、`tabs`、`disclosure`、`stateBlock`、`codeBlock` 或 `segmentedGauge`。
+每个 `PluginComponent` 只能设置一种内容字段：`stack`、`grid`、`card`、`text`、`value`、`badge`、`button`、`toggle`、`list`、`progress`、`circularProgress`、`chart`、`icon`、`image`、`divider`、`spacer`、`table`、`descriptionList`、`form`、`actionMenu`、`confirm`、`tabs`、`disclosure`、`stateBlock`、`codeBlock` 或 `segmentedGauge`。
 
-字段用 protobuf JSON 的 lowerCamelCase：`onTap`、`iconSource`、`descriptionList`、`stateBlock`、`codeBlock`、`segmentedGauge`。
+字段用 protobuf JSON 的 lowerCamelCase：`onTap`、`iconSource`、`descriptionList`、`stateBlock`、`codeBlock`、`segmentedGauge`、`circularProgress`。
 
 ## 通用值与外观
 
@@ -71,7 +71,7 @@ appearance: {
 - `url` 优先于 `systemName`；仅接受 HTTP/HTTPS；失败回退 SF Symbol。
 - `appearance.icon`、`icon.name/url`、`stateBlock.iconUrl` 只是旧插件兼容字段，新代码不要使用。
 
-## 25 类组件
+## 26 类组件
 
 | JSON 字段 | 能力与关键字段 |
 |---|---|
@@ -85,6 +85,7 @@ appearance: {
 | `toggle` | 原生开关。`title`、`subtitle`、`isOn`、`appearance`、`onChange`、`disabled`；切换后的布尔值通过 Action 参数 `value` 传递。 |
 | `list` | 多行列表；列表和单行都可点击。每项有 `title`、`subtitle`、`value`、`appearance`、`onTap`。 |
 | `progress` | 0...1 线性进度、格式化值、说明；可点击。 |
+| `circularProgress` | 0...1 圆形进度、中心格式化值、标题和说明；支持尺寸、图标与点击。 |
 | `chart` | 折线、柱状、面积、环形、仪表图；支持范围、标签、空文案、隐藏范围；可点击。 |
 | `segmentedGauge` | 多分段占比、中心值、图例；每段可有外观；整图可点击。 |
 | `table` | 列定义、格式、宽度倾向、行状态、行点击和整表点击。 |
@@ -126,6 +127,35 @@ appearance: {
 ```
 
 用户切换后，App 保留原有 `params`，并写入 `ctx.params.value`，值为字符串 `"true"` 或 `"false"`。没有 `onChange` 或 `disabled: true` 时，开关按只读状态展示。
+
+### 圆形进度
+
+```javascript
+{
+  id: "memory-progress",
+  circularProgress: {
+    title: "内存使用率",
+    subtitle: "已用 10.2 GB / 16 GB",
+    progress: 0.64,
+    value: {
+      number: 0.64,
+      format: "PLUGIN_VALUE_FORMAT_PERCENT",
+      status: "PLUGIN_STATUS_HEALTHY"
+    },
+    appearance: {
+      accent: "PLUGIN_ACCENT_PURPLE",
+      size: "PLUGIN_COMPONENT_SIZE_LARGE",
+      iconSource: { systemName: "memorychip" }
+    },
+    onTap: { navigate: { surface: "detail", route: "memory" } }
+  }
+}
+```
+
+- `progress` 会限制在 `0...1`；省略 `value` 时，中心自动显示进度百分比。
+- `value` 使用通用 `PluginValue` 格式化和状态语义。
+- `appearance.size` 支持 `COMPACT`、`REGULAR`、`LARGE`；默认 `REGULAR`。
+- 最低服务端版本为 `3.0.26`；旧 App 无法识别时会展示升级提示。
 
 ### 图表
 

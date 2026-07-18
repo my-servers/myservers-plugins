@@ -35,7 +35,7 @@ def validate_demo_cards(cards, where: str) -> None:
         return
     if not isinstance(cards, list):
         fail(f"{where}.demo_cards must be an array")
-    allowed_kinds = {"badge", "progress", "value", "line", "bar", "area", "donut", "gauge"}
+    allowed_kinds = {"badge", "progress", "circular_progress", "value", "line", "bar", "area", "donut", "gauge"}
     for card_index, card in enumerate(cards):
         label = f"{where}.demo_cards[{card_index}]"
         if not isinstance(card, dict):

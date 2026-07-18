@@ -7,7 +7,7 @@
   "demo_cards": [
     {
       "style": "components",
-      "description": "折线图 · 进度条 · 徽标",
+      "description": "折线图 · 圆形进度 · 徽标",
       "dashboard_title": "服务状态",
       "badge_text": "实时",
       "action_title": "查看示例",
@@ -40,7 +40,7 @@
           ]
         },
         {
-          "kind": "progress",
+          "kind": "circular_progress",
           "title": "内存使用",
           "subtitle": "8.9 GB / 16 GB",
           "icon": "memorychip",
@@ -52,7 +52,7 @@
       ]
     }
   ],
-  "min_server_version": "3.0.24",
+  "min_server_version": "3.0.26",
   "min_app_version": "3.20",
   "permissions": [],
   "config_schema": [
@@ -67,7 +67,7 @@
   "commands": [],
   "entrypoints": { "main": "main.js" },
   "assets": [{ "path": "main.js", "kind": "script" }],
-  "checksums": { "main.js": "sha256:a3eedf93a1b4cc535b2d1c0bbac0f0b4e95daf8caf8f3d08473c7ec7d7cd3f40" },
+  "checksums": { "main.js": "sha256:f0984c2f7c43563bde96f1e394d592c07bfa5fc024bb338ceed50b775605e8f9" },
   "widgets": [
     { "id": "summary", "name": "服务摘要", "description": "展示服务健康度和 CPU 使用率。" }
   ],

@@ -250,7 +250,7 @@ globalThis.widget = function (ctx) {
 {
   "demo_cards": [{
     "style": "components",
-    "description": "折线图 · 进度条 · 徽标",
+    "description": "折线图 · 圆形进度 · 徽标",
     "dashboard_title": "服务概览",
     "badge_text": "实时",
     "action_title": "查看示例",
@@ -278,7 +278,7 @@ globalThis.widget = function (ctx) {
         "points": [{ "label": "10:00", "value": 28 }]
       },
       {
-        "kind": "progress",
+        "kind": "circular_progress",
         "title": "内存",
         "accent": "purple",
         "value": 0.56,
@@ -292,7 +292,7 @@ globalThis.widget = function (ctx) {
 
 Demo component 的 kind：
 
-- `badge`、`progress`、`value`；
+- `badge`、`progress`、`circular_progress`、`value`；
 - `line`、`bar`、`area`、`donut`、`gauge`。
 
 accent：`blue`、`green`、`orange`、`red`、`purple`、`indigo`、`teal`、`gray`。`background_image_url`、插件列表的 `icon_url` 都仅使用 HTTP/HTTPS。
@@ -302,6 +302,6 @@ accent：`blue`、`green`、`orange`、`red`、`purple`、`indigo`、`teal`、`g
 ## 版本与兼容性
 
 - 使用语义化插件版本，例如 `1.2.0`。
-- 使用当前组件 DSL、统一 URL 图标和原生 Sheet 时，最低版本不要低于 Demo 插件验证基线：Server `3.0.23`、App `3.20`。
+- 使用当前组件 DSL、统一 URL 图标和原生 Sheet 时，最低版本不要低于 Demo 插件验证基线：Server `3.0.26`、App `3.20`。
 - 如果只使用更早就存在的能力，仍应通过真实旧版本验证后再降低最低版本，不能凭猜测。
 - 新增权限属于安装/升级时需要用户重新确认的能力变化。
