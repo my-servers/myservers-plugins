@@ -274,11 +274,11 @@
         "components": [
           { "kind": "badge", "text": "运行正常", "accent": "green" },
           { "kind": "value", "title": "系统负载", "subtitle": "标准 OpenWrt RPC", "icon": "speedometer", "accent": "green", "value": 0.42 },
-          { "kind": "gauge", "title": "内存使用率", "subtitle": "256 MB / 512 MB", "icon": "memorychip", "accent": "purple", "value": 0.5, "unit": "%" }
+          { "kind": "value", "title": "内存使用", "subtitle": "256 MB / 512 MB", "icon": "memorychip", "accent": "purple", "value": 0.5, "unit": "%" }
         ]
       }
     ],
-    "latest_version": "1.0.8",
-    "manifest_path": "plugins/openwrt-monitor/1.0.8/manifest.json"
+    "latest_version": "1.0.9",
+    "manifest_path": "plugins/openwrt-monitor/1.0.9/manifest.json"
   }
 ]
