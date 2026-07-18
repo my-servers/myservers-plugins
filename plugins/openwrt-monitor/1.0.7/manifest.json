@@ -1,0 +1,107 @@
+{
+  "id": "openwrt-monitor",
+  "version": "1.0.7",
+  "name": "OpenWrt 管理",
+  "description": "通过标准 ubus 查看 OpenWrt 系统、网络、流量、客户端和无线状态。",
+  "icon": "wifi.router.fill",
+  "demo_cards": [
+    {
+      "style": "components",
+      "description": "系统与网络概览",
+      "dashboard_title": "OpenWrt 概览",
+      "badge_text": "路由器在线",
+      "action_title": "查看状态",
+      "background_colors": ["#2563EB", "#0F766E", "#0F172A"],
+      "overlay_opacity": 0.48,
+      "hero": {
+        "icon": "wifi.router.fill",
+        "title": "家庭网络一屏掌握",
+        "subtitle": "固件、负载、内存与 WAN 状态"
+      },
+      "highlights": [
+        { "icon": "network", "label": "WAN", "value": "在线" },
+        { "icon": "clock.arrow.circlepath", "label": "运行", "value": "12 天" }
+      ],
+      "components": [
+        { "kind": "badge", "text": "运行正常", "accent": "green" },
+        { "kind": "gauge", "title": "CPU 使用率", "subtitle": "实时采样", "icon": "cpu", "accent": "green", "value": 0.24, "unit": "%" },
+        { "kind": "gauge", "title": "内存使用率", "subtitle": "256 MB / 512 MB", "icon": "memorychip", "accent": "purple", "value": 0.5, "unit": "%" }
+      ]
+    }
+  ],
+  "min_server_version": "3.0.25",
+  "min_app_version": "3.20",
+  "permissions": [
+    {
+      "type": "http",
+      "reason": "连接用户配置的 OpenWrt 路由器，通过标准 /ubus 接口读取状态并执行已确认的设备操作。",
+      "http": {
+        "allow_any_address": true,
+        "timeout_ms": 12000,
+        "response_limit_bytes": 2097152
+      }
+    },
+    {
+      "type": "cache",
+      "reason": "短期缓存 ubus 会话、设备状态和最近流量采样。",
+      "cache": { "max_bytes": 2097152 }
+    }
+  ],
+  "config_schema": [
+    {
+      "key": "base_url",
+      "label": "OpenWrt 地址",
+      "description": "填写 LuCI 根地址，不需要附加 /ubus。支持局域网 HTTP 或具有有效证书的 HTTPS。",
+      "placeholder": "http://192.168.1.1",
+      "input": "text",
+      "required": true,
+      "default_value": "http://192.168.1.1"
+    },
+    {
+      "key": "username",
+      "label": "用户名",
+      "description": "建议创建仅具有所需 rpcd ACL 的独立用户。",
+      "placeholder": "root",
+      "input": "text",
+      "required": true,
+      "default_value": "root"
+    },
+    {
+      "key": "password",
+      "label": "密码",
+      "description": "用于建立短期 ubus 会话，不会展示在插件页面中。",
+      "placeholder": "OpenWrt 登录密码",
+      "input": "password",
+      "required": true,
+      "secret": true
+    },
+    {
+      "key": "allow_actions",
+      "label": "允许设备操作",
+      "description": "默认关闭。开启后可在二次确认后重载网络或重启路由器。",
+      "input": "switch",
+      "required": false,
+      "default_value": "false"
+    }
+  ],
+  "commands": [],
+  "entrypoints": { "main": "main.js" },
+  "assets": [{ "path": "main.js", "kind": "script" }],
+  "checksums": {
+    "main.js": "sha256:992f16b610e59b7145d5f217c9d02f208b3c8d2e87d4b00494ffc75403d3e3ba"
+  },
+  "widgets": [
+    {
+      "id": "summary",
+      "name": "OpenWrt 状态",
+      "description": "展示路由器在线状态、内存和网络接口。"
+    }
+  ],
+  "background_tasks": [
+    {
+      "id": "collect-traffic",
+      "name": "采集 WAN 流量",
+      "interval_ms": 60000
+    }
+  ]
+}
