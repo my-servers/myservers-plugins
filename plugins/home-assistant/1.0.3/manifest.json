@@ -1,0 +1,131 @@
+{
+  "id": "home-assistant",
+  "version": "1.0.3",
+  "name": "Home Assistant",
+  "description": "集中查看并控制 Home Assistant 的灯光、开关、温控、窗帘、媒体与传感器。",
+  "icon": "house.fill",
+  "demo_cards": [
+    {
+      "style": "components",
+      "description": "家庭状态概览",
+      "dashboard_title": "Home Assistant 概览",
+      "badge_text": "家庭在线",
+      "action_title": "查看实体",
+      "background_colors": ["#18BCF2", "#087EAC", "#0F172A"],
+      "overlay_opacity": 0.44,
+      "hero": {
+        "icon": "house.fill",
+        "title": "全屋设备集中管理",
+        "subtitle": "灯光、环境、温控与自动化一屏掌握"
+      },
+      "highlights": [
+        { "icon": "square.grid.2x2.fill", "label": "实体", "value": "86" },
+        { "icon": "bolt.fill", "label": "活动", "value": "18" }
+      ],
+      "components": [
+        { "kind": "badge", "text": "系统正常", "accent": "green" },
+        { "kind": "value", "title": "客厅温度", "subtitle": "温湿度传感器", "icon": "thermometer.medium", "accent": "orange", "value": 24.6, "unit": "°C" },
+        {
+          "kind": "donut",
+          "title": "实体状态",
+          "icon": "house.fill",
+          "accent": "blue",
+          "points": [
+            { "label": "活动", "value": 18 },
+            { "label": "待机", "value": 65 },
+            { "label": "不可用", "value": 3 }
+          ]
+        }
+      ]
+    },
+    {
+      "style": "components",
+      "description": "设备控制预览",
+      "dashboard_title": "常用设备",
+      "badge_text": "本地优先",
+      "action_title": "打开控制",
+      "background_colors": ["#0EA5E9", "#0F766E", "#111827"],
+      "overlay_opacity": 0.48,
+      "hero": {
+        "icon": "lightbulb.led.fill",
+        "title": "常用设备快速控制",
+        "subtitle": "亮度、温度、窗帘与媒体状态"
+      },
+      "highlights": [
+        { "icon": "lightbulb.fill", "label": "灯光", "value": "6 开启" },
+        { "icon": "thermometer.medium", "label": "空调", "value": "24°C" }
+      ],
+      "components": [
+        { "kind": "badge", "text": "客厅有人", "accent": "green" },
+        { "kind": "gauge", "title": "主灯亮度", "icon": "sun.max.fill", "accent": "orange", "min": 0, "max": 100, "points": [{ "label": "亮度", "value": 68 }] },
+        { "kind": "value", "title": "窗帘位置", "subtitle": "客厅南窗", "icon": "window.shade.open", "accent": "teal", "value": 75, "unit": "%" }
+      ]
+    }
+  ],
+  "min_server_version": "3.0.28",
+  "min_app_version": "3.20",
+  "permissions": [
+    {
+      "type": "http",
+      "reason": "连接用户配置的 Home Assistant REST API，读取实体状态并在明确授权后执行设备操作。",
+      "http": {
+        "allow_any_address": true,
+        "timeout_ms": 12000,
+        "response_limit_bytes": 4194304
+      }
+    },
+    {
+      "type": "cache",
+      "reason": "短期缓存 Home Assistant 配置和实体状态，减少重复请求。",
+      "cache": { "max_bytes": 4194304 }
+    }
+  ],
+  "config_schema": [
+    {
+      "key": "base_url",
+      "label": "Home Assistant 地址",
+      "description": "填写 Home Assistant 根地址，不需要附加 /api。支持局域网 HTTP 或具有有效证书的 HTTPS。",
+      "placeholder": "http://homeassistant.local:8123",
+      "input": "text",
+      "required": true,
+      "default_value": "http://homeassistant.local:8123"
+    },
+    {
+      "key": "token",
+      "label": "长期访问令牌",
+      "description": "在 Home Assistant 个人资料页创建 Long-Lived Access Token。令牌只用于服务端请求，不会展示在插件页面。",
+      "placeholder": "Home Assistant Long-Lived Access Token",
+      "input": "password",
+      "required": true,
+      "secret": true
+    },
+    {
+      "key": "allow_controls",
+      "label": "允许设备控制",
+      "description": "默认关闭。开启后可控制灯光、开关、温控、窗帘、风扇、媒体、锁和场景等实体。",
+      "input": "switch",
+      "required": false,
+      "default_value": "false"
+    }
+  ],
+  "commands": [],
+  "entrypoints": { "main": "main.js" },
+  "assets": [{ "path": "main.js", "kind": "script" }],
+  "checksums": {
+    "main.js": "sha256:2d6e1da3a2a79b8cf0fafca8161bb7ee216c424f9f186902b25c4a3ff30f048b"
+  },
+  "widgets": [
+    {
+      "id": "summary",
+      "name": "Home Assistant 摘要",
+      "description": "展示实体数量、活动状态与常用环境数据。"
+    }
+  ],
+  "background_tasks": [
+    {
+      "id": "refresh",
+      "name": "刷新实体状态",
+      "interval_ms": 60000
+    }
+  ]
+}
