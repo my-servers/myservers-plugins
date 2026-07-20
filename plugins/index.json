@@ -252,7 +252,8 @@
     "id": "openwrt-monitor",
     "name": "OpenWrt 管理",
     "description": "通过标准 ubus 查看 OpenWrt 系统、网络、流量、客户端和无线状态。",
-    "icon": "wifi.router.fill",
+    "icon": "https://avatars.githubusercontent.com/u/2528830?v=4",
+    "icon_url": "https://avatars.githubusercontent.com/u/2528830?v=4",
     "demo_cards": [
       {
         "style": "components",
@@ -278,14 +279,14 @@
         ]
       }
     ],
-    "latest_version": "1.0.10",
-    "manifest_path": "plugins/openwrt-monitor/1.0.10/manifest.json"
+    "latest_version": "1.0.11",
+    "manifest_path": "plugins/openwrt-monitor/1.0.11/manifest.json"
   },
   {
     "id": "home-assistant",
     "name": "Home Assistant",
     "description": "集中查看并控制 Home Assistant 的灯光、开关、温控、窗帘、媒体与传感器。",
-    "icon": "house.fill",
+    "icon": "https://www.home-assistant.io/images/favicon-192x192.png",
     "icon_url": "https://www.home-assistant.io/images/favicon-192x192.png",
     "demo_cards": [
       {
@@ -345,7 +346,7 @@
         ]
       }
     ],
-    "latest_version": "1.0.10",
-    "manifest_path": "plugins/home-assistant/1.0.10/manifest.json"
+    "latest_version": "1.0.11",
+    "manifest_path": "plugins/home-assistant/1.0.11/manifest.json"
   }
 ]
