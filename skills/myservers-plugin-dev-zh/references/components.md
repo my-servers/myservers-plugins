@@ -4,7 +4,7 @@
 
 - JSON 规则
 - 通用值与外观
-- 26 类组件
+- 27 类组件
 - 图表与状态变体
 - 原生半弹层
 - Action 与 Effects
@@ -23,9 +23,9 @@ return {
 };
 ```
 
-每个 `PluginComponent` 只能设置一种内容字段：`stack`、`grid`、`card`、`text`、`value`、`badge`、`button`、`toggle`、`list`、`progress`、`circularProgress`、`chart`、`icon`、`image`、`divider`、`spacer`、`table`、`descriptionList`、`form`、`actionMenu`、`confirm`、`tabs`、`disclosure`、`stateBlock`、`codeBlock` 或 `segmentedGauge`。
+每个 `PluginComponent` 只能设置一种内容字段：`stack`、`grid`、`card`、`text`、`value`、`badge`、`button`、`toggle`、`slider`、`list`、`progress`、`circularProgress`、`chart`、`icon`、`image`、`divider`、`spacer`、`table`、`descriptionList`、`form`、`actionMenu`、`confirm`、`tabs`、`disclosure`、`stateBlock`、`codeBlock` 或 `segmentedGauge`。
 
-字段用 protobuf JSON 的 lowerCamelCase：`onTap`、`iconSource`、`descriptionList`、`stateBlock`、`codeBlock`、`segmentedGauge`、`circularProgress`。
+字段用 protobuf JSON 的 lowerCamelCase：`onTap`、`onChange`、`iconSource`、`descriptionList`、`stateBlock`、`codeBlock`、`segmentedGauge`、`circularProgress`、`hideValue`。
 
 ## 通用值与外观
 
@@ -71,7 +71,7 @@ appearance: {
 - `url` 优先于 `systemName`；仅接受 HTTP/HTTPS；失败回退 SF Symbol。
 - `appearance.icon`、`icon.name/url`、`stateBlock.iconUrl` 只是旧插件兼容字段，新代码不要使用。
 
-## 26 类组件
+## 27 类组件
 
 | JSON 字段 | 能力与关键字段 |
 |---|---|
@@ -82,7 +82,8 @@ appearance: {
 | `value` | 标题、说明、格式化值、趋势和状态；可点击。`title`、`subtitle`、`value`、`appearance`、`onTap`。 |
 | `badge` | 短状态或短值；可点击。`text`、`value`、`appearance`、`onTap`。 |
 | `button` | 普通插件 Action 或导航。`title`、`subtitle`、`appearance`、`onTap`。 |
-| `toggle` | 原生开关。`title`、`subtitle`、`isOn`、`appearance`、`onChange`、`disabled`；切换后的布尔值通过 Action 参数 `value` 传递。 |
+| `toggle` | 原生开关。`title`、`subtitle`、`isOn`、`appearance`、`onChange`、可选 `onTap`、`disabled`；切换后的布尔值通过 Action 参数 `value` 传递。网格卡片的 `onTap` 可打开原生半弹层展示更多控制，右上角开关仍独立即时生效；需要服务端 `3.0.28` 或更高版本。 |
+| `slider` | 原生滑块。`title`、`subtitle`、`value`、`min`、`max`、`step`、`hideValue`、`appearance`、`onChange`、`disabled`；松手后的数值通过 Action 参数 `value` 传递。 |
 | `list` | 多行列表；列表和单行都可点击。每项有 `title`、`subtitle`、`value`、`appearance`、`onTap`。 |
 | `progress` | 0...1 线性进度、格式化值、说明；可点击。 |
 | `circularProgress` | 0...1 圆形进度、中心格式化值、标题和说明；支持尺寸、图标与点击。 |
@@ -126,7 +127,43 @@ appearance: {
 }
 ```
 
-用户切换后，App 保留原有 `params`，并写入 `ctx.params.value`，值为字符串 `"true"` 或 `"false"`。没有 `onChange` 或 `disabled: true` 时，开关按只读状态展示。
+用户切换后，App 保留原有 `params`，并写入 `ctx.params.value`，值为字符串 `"true"` 或 `"false"`。在网格中提供 `onTap` 时，点击开关以外的卡片区域会执行该动作，通常导航到 `sheet` 来承载亮度、温度等更多控制；开关不会触发 `onTap`。没有 `onChange`、`onTap` 或 `disabled: true` 时，开关按只读状态展示。该能力需要服务端 `3.0.28` 或更高版本。
+
+### 滑块
+
+```javascript
+{
+  id: "brightness",
+  slider: {
+    title: "亮度",
+    subtitle: "客厅主灯",
+    value: {
+      number: 128,
+      unit: "/255",
+      format: "PLUGIN_VALUE_FORMAT_NUMBER"
+    },
+    min: 0,
+    max: 255,
+    step: 1,
+    appearance: {
+      accent: "PLUGIN_ACCENT_ORANGE",
+      iconSource: { systemName: "sun.max.fill" }
+    },
+    onChange: {
+      plugin: {
+        actionId: "setBrightness",
+        params: { entityId: "light.living_room" }
+      }
+    }
+  }
+}
+```
+
+- `value.number` 是当前数值；`value.format`、`value.unit` 和 `value.status` 沿用通用 `PluginValue` 语义。
+- `max` 必须大于 `min`；`step: 0` 表示连续值，正数表示离散步进。
+- 拖动时 App 只更新本地数值，松手后才执行一次 `onChange`，并将数值写入字符串参数 `ctx.params.value`；原有 `params` 会保留。
+- `hideValue: true` 隐藏右上角数值；没有 `onChange` 或 `disabled: true` 时按只读状态展示。
+- 小组件将滑块显示为只读进度摘要。最低服务端版本为 `3.0.27`，最低 App 版本为 `3.20`。
 
 ### 圆形进度
 

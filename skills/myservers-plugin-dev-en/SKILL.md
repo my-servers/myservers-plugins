@@ -29,11 +29,13 @@ The schema examples are JSON/JavaScript and can be used unchanged regardless of 
 
 ## Supported presentation model
 
-There are 26 component content types:
+There are 27 component content types:
 
-`stack`, `grid`, `card`, `text`, `value`, `badge`, `button`, `toggle`, `list`, `progress`, `circularProgress`, `chart`, `segmentedGauge`, `table`, `descriptionList`, `form`, `actionMenu`, `confirm`, `tabs`, `disclosure`, `stateBlock`, `codeBlock`, `icon`, `image`, `divider`, and `spacer`.
+`stack`, `grid`, `card`, `text`, `value`, `badge`, `button`, `toggle`, `slider`, `list`, `progress`, `circularProgress`, `chart`, `segmentedGauge`, `table`, `descriptionList`, `form`, `actionMenu`, `confirm`, `tabs`, `disclosure`, `stateBlock`, `codeBlock`, `icon`, `image`, `divider`, and `spacer`.
 
-A `toggle` renders a native switch with `title`, `subtitle`, `isOn`, `appearance`, `onChange`, and `disabled`. On change, the app preserves declared action params and adds the target state as `ctx.params.value`, using the string `"true"` or `"false"`.
+A `toggle` renders a native switch with `title`, `subtitle`, `isOn`, `appearance`, `onChange`, optional `onTap`, and `disabled`. On change, the app preserves declared action params and adds the target state as `ctx.params.value`, using the string `"true"` or `"false"`. In a grid, `onTap` lets the card open a native sheet for additional controls while the switch remains an independent immediate action; it requires server 3.0.28 or later.
+
+A `slider` renders a native range control with a formatted `PluginValue`, `min`, `max`, optional `step`, `hideValue`, `appearance`, `onChange`, and `disabled`. The app updates the local value while dragging, then preserves declared action params and adds the final numeric value as the string `ctx.params.value` when the user releases the control. It requires server 3.0.27 and app 3.20 or later.
 
 A `circularProgress` renders a 0...1 ring with a centered formatted `value`, `title`, `subtitle`, `appearance`, and optional `onTap`. When `value` is omitted, the center automatically shows the progress percentage. It requires server 3.0.26 or later.
 

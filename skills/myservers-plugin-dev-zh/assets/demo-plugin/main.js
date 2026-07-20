@@ -132,6 +132,22 @@ globalThis.detail = function (ctx) {
           },
           onChange: { plugin: { actionId: "setAlerts" } }
         }
+      },
+      {
+        id: "brightness",
+        slider: {
+          title: "亮度",
+          subtitle: "客厅主灯",
+          value: { number: 128, unit: "/255", format: "PLUGIN_VALUE_FORMAT_NUMBER" },
+          min: 0,
+          max: 255,
+          step: 1,
+          appearance: {
+            accent: "PLUGIN_ACCENT_ORANGE",
+            iconSource: { systemName: "sun.max.fill" }
+          },
+          onChange: { plugin: { actionId: "setBrightness", params: { entityId: "light.living_room" } } }
+        }
       }
     ]
   };
@@ -174,6 +190,13 @@ globalThis.actions = {
     return {
       effects: [
         { toast: { text: ctx.params.value === "true" ? "通知已开启" : "通知已关闭", level: "success" } }
+      ]
+    };
+  },
+  setBrightness: function (ctx) {
+    return {
+      effects: [
+        { toast: { text: "亮度已调整为 " + ctx.params.value, level: "success" } }
       ]
     };
   },
